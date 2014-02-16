@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<!-- saved from url=(0036)http://square.github.io/crossfilter/ -->
+<html style=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8">
+<title>Crossfilter</title>
+<style>
+
+@import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700);
+
+body {
+  font-family: "Helvetica Neue";
+  margin: 40px auto;
+  width: 960px;
+  min-height: 2000px;
+}
+
+#body {
+  position: relative;
+}
+
+footer {
+  padding: 2em 0 1em 0;
+  font-size: 12px;
+}
+
+h1 {
+  font-size: 96px;
+  margin-top: .3em;
+  margin-bottom: 0;
+}
+
+h1 + h2 {
+  margin-top: 0;
+}
+
+h2 {
+  font-weight: 400;
+  font-size: 28px;
+}
+
+h1, h2 {
+  font-family: "Yanone Kaffeesatz";
+  text-rendering: optimizeLegibility;
+}
+
+#body > p {
+  line-height: 1.5em;
+  width: 640px;
+  text-rendering: optimizeLegibility;
+}
+
+#charts {
+  padding: 10px 0;
+}
+
+.chart {
+  display: inline-block;
+  height: 151px;
+  margin-bottom: 20px;
+}
+
+.reset {
+  padding-left: 1em;
+  font-size: smaller;
+  color: #ccc;
+}
+
+.background.bar {
+  fill: #ccc;
+}
+
+.foreground.bar {
+  fill: steelblue;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.brush rect.extent {
+  fill: steelblue;
+  fill-opacity: .125;
+}
+
+.brush .resize path {
+  fill: #eee;
+  stroke: #666;
+}
+
+#hour-chart {
+  width: 260px;
+}
+
+#delay-chart {
+  width: 230px;
+}
+
+#distance-chart {
+  width: 420px;
+}
+
+#date-chart {
+  width: 920px;
+}
+
+#flight-list {
+  min-height: 1024px;
+}
+
+#flight-list .date,
+#flight-list .day {
+  margin-bottom: .4em;
+}
+
+#flight-list .flight {
+  line-height: 1.5em;
+  background: #eee;
+  width: 640px;
+  margin-bottom: 1px;
+}
+
+#flight-list .time {
+  color: #999;
+}
+
+#flight-list .flight div {
+  display: inline-block;
+  width: 100px;
+}
+
+#flight-list div.distance,
+#flight-list div.delay {
+  width: 160px;
+  padding-right: 10px;
+  text-align: right;
+}
+
+#flight-list .early {
+  color: green;
+}
+
+aside {
+  position: absolute;
+  left: 740px;
+  font-size: smaller;
+  width: 220px;
+}
+
+</style>
+
+</head><body style=""><div id="body">
+
+<a href="https://github.com/square"><img src="./Crossfilter_files/logotype.png" width="122" height="31"></a>
+
+<h1>Crossfilter</h1>
+
+<h2>Fast Multidimensional Filtering for Coordinated Views</h2>
+
+<p><b>Crossfilter</b> is a <a href="https://github.com/square/crossfilter">JavaScript library</a> for exploring large multivariate datasets in the browser. Crossfilter supports extremely fast (&lt;30ms) interaction with coordinated views, even with datasets containing a million or more records; we built it to power analytics for <a href="https://squareup.com/register">Square Register</a>, allowing merchants to slice and dice their payment history fluidly.
+
+</p><p>Since most interactions only involve a single dimension, and then only small adjustments are made to the filter values, incremental filtering and reducing is significantly faster than starting from scratch. Crossfilter uses sorted indexes (and a few bit-twiddling hacks) to make this possible, dramatically increasing the perfor­mance of live histograms and top-<i>K</i> lists. For more details on how Crossfilter works, see the <a href="https://github.com/square/crossfilter/wiki/API-Reference">API reference</a>.
+
+</p><h2>Example: Airline on-time performance</h2>
+
+<p>The coordinated visualizations below (built with <a href="http://mbostock.github.com/d3/">D3</a>) show nearly a quarter-million flights from early 2001: part of the <a href="http://stat-computing.org/dataexpo/2009/">ASA Data Expo</a> dataset. The dataset is 5.3MB, so it might take a few seconds to download. Click and drag on any chart to filter by the associated dimension. The table beneath shows the eighty most recent flights that match the current filters; these are the <i>details on demand</i>, anecdotal evidence you can use to weigh different hypotheses.
+
+</p><p>Some questions to consider: How does time-of-day correlate with <a href="javascript:filter([null, [100, 150], null, null])">arrival delay</a>? Are <a href="javascript:filter([null, null, [1700, 2000], null])">longer</a> or <a href="javascript:filter([null, null, [0, 300], null])">shorter</a> flights more likely to arrive early? What happened on <a href="javascript:filter([null, [80, 150], null, [new Date(2001, 0, 12), new Date(2001, 0, 13)]])">January 12</a>? How do flight patterns differ between <a href="javascript:filter([null, null, null, [new Date(2001, 0, 27), new Date(2001, 0, 29)]])">weekends</a> and <a href="javascript:filter([null, null, null, [new Date(2001, 0, 29), new Date(2001, 1, 3)]])">weekdays</a>, or <a href="javascript:filter([[4, 7], null, null, null])">mornings</a> and <a href="javascript:filter([[21, 24], null, null, null])">nights</a>? <a href="https://github.com/square/crossfilter/tree/gh-pages">Fork this example</a> and try your own data!
+
+</p><div id="charts">
+  <div id="hour-chart" class="chart">
+    <div class="title">Time of Day<a href="javascript:reset(0)" class="reset" style="display: none;">reset</a></div>
+  <svg width="260" height="130"><g transform="translate(10,10)"><clippath id="clip-0"><rect width="240" height="100"></rect></clippath><path class="background bar" d="M0,100V98.96698026194429h9V100M10,100V99.85242575170632h9V100M20,100V99.90776609481645h9V100M30,100V99.98155321896328h9V100M50,100V97.89706696181517h9V100M60,100V26.083748385906674h9V100M70,100V1.4210854715202004e-14h9V100M80,100V2.8961446227633303h9V100M90,100V13.263235565393856h9V100M100,100V16.140933407120457h9V100M110,100V10.403984504703928h9V100M120,100V6.087437742114005h9V100M130,100V16.860357867552125h9V100M140,100V14.148681055155876h9V100M150,100V13.779745434421699h9V100M160,100V14.074893931009044h9V100M170,100V0.7563180225050701h9V100M180,100V7.692307692307693h9V100M190,100V15.366168603578672h9V100M200,100V21.121564287031916h9V100M210,100V32.90905736948902h9V100M220,100V73.78712414683638h9V100M230,100V93.41449916989485h9V100"></path><path class="foreground bar" clip-path="url(#clip-0)" d="M0,100V98.96698026194429h9V100M10,100V99.85242575170632h9V100M20,100V99.90776609481645h9V100M30,100V99.98155321896328h9V100M50,100V97.89706696181517h9V100M60,100V26.083748385906674h9V100M70,100V1.4210854715202004e-14h9V100M80,100V2.8961446227633303h9V100M90,100V13.263235565393856h9V100M100,100V16.140933407120457h9V100M110,100V10.403984504703928h9V100M120,100V6.087437742114005h9V100M130,100V16.860357867552125h9V100M140,100V14.148681055155876h9V100M150,100V13.779745434421699h9V100M160,100V14.074893931009044h9V100M170,100V0.7563180225050701h9V100M180,100V7.692307692307693h9V100M190,100V15.366168603578672h9V100M200,100V21.121564287031916h9V100M210,100V32.90905736948902h9V100M220,100V73.78712414683638h9V100M230,100V93.41449916989485h9V100"></path><g class="axis" transform="translate(0,100)"><g class="tick" transform="translate(0,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">0</text></g><g class="tick" transform="translate(20,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">2</text></g><g class="tick" transform="translate(40,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">4</text></g><g class="tick" transform="translate(60,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">6</text></g><g class="tick" transform="translate(80,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">8</text></g><g class="tick" transform="translate(100,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">10</text></g><g class="tick" transform="translate(120,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">12</text></g><g class="tick" transform="translate(140,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">14</text></g><g class="tick" transform="translate(160,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">16</text></g><g class="tick" transform="translate(180,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">18</text></g><g class="tick" transform="translate(200,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">20</text></g><g class="tick" transform="translate(220,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">22</text></g><g class="tick" transform="translate(240,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">24</text></g><path class="domain" d="M0,6V0H240V6"></path></g><g class="brush" style="pointer-events: all; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><rect class="background" x="0" width="240" height="100" style="visibility: hidden; cursor: crosshair;"></rect><rect class="extent" x="0" width="0" height="100" style="cursor: move;"></rect><g class="resize e" transform="translate(0,0)" style="cursor: ew-resize; display: none;"><rect x="-3" width="6" height="100" style="visibility: hidden;"></rect><path d="M0.5,33.333333333333336A6,6 0 0 1 6.5,39.333333333333336V60.66666666666667A6,6 0 0 1 0.5,66.66666666666667ZM2.5,41.333333333333336V58.66666666666667M4.5,41.333333333333336V58.66666666666667"></path></g><g class="resize w" transform="translate(0,0)" style="cursor: ew-resize; display: none;"><rect x="-3" width="6" height="100" style="visibility: hidden;"></rect><path d="M-0.5,33.333333333333336A6,6 0 0 0 -6.5,39.333333333333336V60.66666666666667A6,6 0 0 0 -0.5,66.66666666666667ZM-2.5,41.333333333333336V58.66666666666667M-4.5,41.333333333333336V58.66666666666667"></path></g></g></g></svg></div>
+  <div id="delay-chart" class="chart">
+    <div class="title">Arrival Delay (min.)<a href="javascript:reset(1)" class="reset" style="display: none;">reset</a></div>
+  <svg width="230" height="130"><g transform="translate(10,10)"><clippath id="clip-1"><rect width="210" height="100"></rect></clippath><path class="background bar" d="M0,100V100h9V100M10,100V99.98072772124576h9V100M20,100V99.67622571692877h9V100M30,100V98.01110083256245h9V100M40,100V80.65834104224484h9V100M50,100V1.4210854715202004e-14h9V100M60,100V16.53946962688869h9V100M70,100V65.71847055195806h9V100M80,100V81.74144310823311h9V100M90,100V88.40579710144928h9V100M100,100V92.14076472402097h9V100M110,100V94.82346592661116h9V100M120,100V96.095436324391h9V100M130,100V96.98967005858773h9V100M140,100V97.93786617329633h9V100M150,100V98.33102065988282h9V100M160,100V98.99398704902868h9V100M170,100V99.1481652790626h9V100M180,100V99.46423065063213h9V100M190,100V99.49892075238976h9V100M200,100V98.17298797409806h9V100"></path><path class="foreground bar" clip-path="url(#clip-1)" d="M0,100V100h9V100M10,100V99.98072772124576h9V100M20,100V99.67622571692877h9V100M30,100V98.01110083256245h9V100M40,100V80.65834104224484h9V100M50,100V1.4210854715202004e-14h9V100M60,100V16.53946962688869h9V100M70,100V65.71847055195806h9V100M80,100V81.74144310823311h9V100M90,100V88.40579710144928h9V100M100,100V92.14076472402097h9V100M110,100V94.82346592661116h9V100M120,100V96.095436324391h9V100M130,100V96.98967005858773h9V100M140,100V97.93786617329633h9V100M150,100V98.33102065988282h9V100M160,100V98.99398704902868h9V100M170,100V99.1481652790626h9V100M180,100V99.46423065063213h9V100M190,100V99.49892075238976h9V100M200,100V98.17298797409806h9V100"></path><g class="axis" transform="translate(0,100)"><g class="tick" transform="translate(0,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">-60</text></g><g class="tick" transform="translate(20,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">-40</text></g><g class="tick" transform="translate(40,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">-20</text></g><g class="tick" transform="translate(60,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">0</text></g><g class="tick" transform="translate(80,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">20</text></g><g class="tick" transform="translate(100,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">40</text></g><g class="tick" transform="translate(120,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">60</text></g><g class="tick" transform="translate(140,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">80</text></g><g class="tick" transform="translate(160,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">100</text></g><g class="tick" transform="translate(180,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">120</text></g><g class="tick" transform="translate(200,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">140</text></g><path class="domain" d="M0,6V0H210V6"></path></g><g class="brush" style="pointer-events: all; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><rect class="background" x="0" width="210" height="100" style="visibility: hidden; cursor: crosshair;"></rect><rect class="extent" x="0" width="0" height="100" style="cursor: move;"></rect><g class="resize e" transform="translate(0,0)" style="cursor: ew-resize; display: none;"><rect x="-3" width="6" height="100" style="visibility: hidden;"></rect><path d="M0.5,33.333333333333336A6,6 0 0 1 6.5,39.333333333333336V60.66666666666667A6,6 0 0 1 0.5,66.66666666666667ZM2.5,41.333333333333336V58.66666666666667M4.5,41.333333333333336V58.66666666666667"></path></g><g class="resize w" transform="translate(0,0)" style="cursor: ew-resize; display: none;"><rect x="-3" width="6" height="100" style="visibility: hidden;"></rect><path d="M-0.5,33.333333333333336A6,6 0 0 0 -6.5,39.333333333333336V60.66666666666667A6,6 0 0 0 -0.5,66.66666666666667ZM-2.5,41.333333333333336V58.66666666666667M-4.5,41.333333333333336V58.66666666666667"></path></g></g></g></svg></div>
+  <div id="distance-chart" class="chart">
+    <div class="title">Distance (mi.)<a href="javascript:reset(2)" class="reset" style="display: none;">reset</a></div>
+  <svg width="420" height="130"><g transform="translate(10,10)"><clippath id="clip-2"><rect width="400" height="100"></rect></clippath><path class="background bar" d="M20,100V92.07778751892883h9V100M30,100V55.09683589702718h9V100M40,100V38.0250259026062h9V100M50,100V34.42257113254165h9V100M60,100V0h9V100M70,100V38.13660636008608h9V100M80,100V56.25249063521161h9V100M90,100V66.9960946839882h9V100M100,100V88.10871124571611h9V100M110,100V75.30883876623895h9V100M120,100V78.45700167370686h9V100M130,100V75.44432932175022h9V100M140,100V93.0102813421535h9V100M150,100V90.53957121224197h9V100M160,100V88.339842193353h9V100M170,100V91.4640950027895h9V100M180,100V92.30094843388858h9V100M190,100V94.61225791025743h9V100M200,100V91.28875428389256h9V100M210,100V90.69897186578464h9V100M220,100V94.25360643978641h9V100M230,100V97.0909380728461h9V100M240,100V95.24986052442816h9V100M250,100V96.79604686379214h9V100M260,100V98.08719215748785h9V100M270,100V97.61696022953694h9V100M280,100V96.67649637363513h9V100M290,100V96.19829441300709h9V100M300,100V98.02343189607078h9V100M310,100V97.13078823623177h9V100M320,100V99.04359607874392h9V100M330,100V98.98780585000398h9V100M340,100V99.93623973858293h9V100M350,100V96.67649637363513h9V100M360,100V98.98780585000398h9V100M370,100V99.52179803937196h9V100M380,100V99.52179803937196h9V100M390,100V94.11014585159799h9V100"></path><path class="foreground bar" clip-path="url(#clip-2)" d="M20,100V92.07778751892883h9V100M30,100V55.09683589702718h9V100M40,100V38.0250259026062h9V100M50,100V34.42257113254165h9V100M60,100V0h9V100M70,100V38.13660636008608h9V100M80,100V56.25249063521161h9V100M90,100V66.9960946839882h9V100M100,100V88.10871124571611h9V100M110,100V75.30883876623895h9V100M120,100V78.45700167370686h9V100M130,100V75.44432932175022h9V100M140,100V93.0102813421535h9V100M150,100V90.53957121224197h9V100M160,100V88.339842193353h9V100M170,100V91.4640950027895h9V100M180,100V92.30094843388858h9V100M190,100V94.61225791025743h9V100M200,100V91.28875428389256h9V100M210,100V90.69897186578464h9V100M220,100V94.25360643978641h9V100M230,100V97.0909380728461h9V100M240,100V95.24986052442816h9V100M250,100V96.79604686379214h9V100M260,100V98.08719215748785h9V100M270,100V97.61696022953694h9V100M280,100V96.67649637363513h9V100M290,100V96.19829441300709h9V100M300,100V98.02343189607078h9V100M310,100V97.13078823623177h9V100M320,100V99.04359607874392h9V100M330,100V98.98780585000398h9V100M340,100V99.93623973858293h9V100M350,100V96.67649637363513h9V100M360,100V98.98780585000398h9V100M370,100V99.52179803937196h9V100M380,100V99.52179803937196h9V100M390,100V94.11014585159799h9V100"></path><g class="axis" transform="translate(0,100)"><g class="tick" transform="translate(0,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">0</text></g><g class="tick" transform="translate(40,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">200</text></g><g class="tick" transform="translate(80,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">400</text></g><g class="tick" transform="translate(120,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">600</text></g><g class="tick" transform="translate(160,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">800</text></g><g class="tick" transform="translate(200,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">1,000</text></g><g class="tick" transform="translate(240,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">1,200</text></g><g class="tick" transform="translate(280,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">1,400</text></g><g class="tick" transform="translate(320,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">1,600</text></g><g class="tick" transform="translate(360,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">1,800</text></g><g class="tick" transform="translate(400,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">2,000</text></g><path class="domain" d="M0,6V0H400V6"></path></g><g class="brush" style="pointer-events: all; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><rect class="background" x="0" width="400" height="100" style="visibility: hidden; cursor: crosshair;"></rect><rect class="extent" x="0" width="0" height="100" style="cursor: move;"></rect><g class="resize e" transform="translate(0,0)" style="cursor: ew-resize; display: none;"><rect x="-3" width="6" height="100" style="visibility: hidden;"></rect><path d="M0.5,33.333333333333336A6,6 0 0 1 6.5,39.333333333333336V60.66666666666667A6,6 0 0 1 0.5,66.66666666666667ZM2.5,41.333333333333336V58.66666666666667M4.5,41.333333333333336V58.66666666666667"></path></g><g class="resize w" transform="translate(0,0)" style="cursor: ew-resize; display: none;"><rect x="-3" width="6" height="100" style="visibility: hidden;"></rect><path d="M-0.5,33.333333333333336A6,6 0 0 0 -6.5,39.333333333333336V60.66666666666667A6,6 0 0 0 -0.5,66.66666666666667ZM-2.5,41.333333333333336V58.66666666666667M-4.5,41.333333333333336V58.66666666666667"></path></g></g></g></svg></div>
+  <div id="date-chart" class="chart">
+    <div class="title">Date<a href="javascript:reset(3)" class="reset" style="">reset</a></div>
+  <svg width="920" height="130"><g transform="translate(10,10)"><clippath id="clip-3"><rect width="300" height="100" x="310"></rect></clippath><path class="background bar" d="M0,100V26.55737704918033h9V100M10,100V3.351548269581059h9V100M20,100V2.9508196721311464h9V100M30,100V3.0236794171220396h9V100M40,100V2.841530054644821h9V100M50,100V21.89435336976321h9V100M60,100V6.010928961748633h9V100M70,100V2.5865209471766804h9V100M80,100V2.440801457194894h9V100M90,100V6.375227686703099h9V100M100,100V4.881602914389802h9V100M110,100V3.533697632058292h9V100M120,100V21.530054644808743h9V100M130,100V5.8287795992713995h9V100M140,100V1.7850637522768693h9V100M150,100V5.573770491803273h9V100M160,100V2.003642987249549h9V100M170,100V2.185792349726782h9V100M180,100V2.185792349726782h9V100M190,100V24.26229508196721h9V100M200,100V11.402550091074687h9V100M210,100V1.34790528233151h9V100M220,100V1.0564663023679373h9V100M230,100V2.440801457194894h9V100M240,100V2.003642987249549h9V100M250,100V1.4207650273224033h9V100M260,100V24.59016393442623h9V100M270,100V11.183970856101993h9V100M280,100V3.533697632058292h9V100M290,100V2.2222222222222285h9V100M300,100V1.34790528233151h9V100M310,100V1.4207650273224033h9V100M320,100V0.983606557377044h9V100M330,100V23.788706739526404h9V100M340,100V10.892531876138435h9V100M350,100V2.258652094717675h9V100M360,100V1.8579234972677483h9V100M370,100V3.0236794171220396h9V100M380,100V1.34790528233151h9V100M390,100V3.2058287795992726h9V100M400,100V23.86156648451731h9V100M410,100V10.346083788706736h9V100M420,100V2.6593806921675736h9V100M430,100V5.100182149362482h9V100M440,100V2.7322404371584668h9V100M450,100V2.4772313296903405h9V100M460,100V0.983606557377044h9V100M470,100V23.60655737704917h9V100M480,100V10.491803278688522h9V100M490,100V1.0200364298724907h9V100M500,100V1.4571948998178499h9V100M510,100V1.5664845173041897h9V100M520,100V1.0564663023679373h9V100M530,100V1.712204007285976h9V100M540,100V24.553734061930783h9V100M550,100V10.965391621129328h9V100M560,100V1.7486338797814227h9V100M570,100V2.877959927140253h9V100M580,100V5.683060109289613h9V100M590,100V1.9307832422586557h9V100M600,100V0.983606557377044h9V100M610,100V24.225865209471763h9V100M620,100V10.856102003642988h9V100M630,100V3.096539162112933h9V100M640,100V3.3879781420764914h9V100M650,100V2.076502732240442h9V100M660,100V2.1129326047358887h9V100M670,100V0.8743169398907042h9V100M680,100V23.497267759562845h9V100M690,100V9.836065573770497h9V100M700,100V1.0928961748633839h9V100M710,100V1.7486338797814227h9V100M720,100V1.712204007285976h9V100M730,100V0.6921675774134854h9V100M740,100V0.6921675774134854h9V100M750,100V22.877959927140253h9V100M760,100V9.690346083788697h9V100M770,100V0.546448087431699h9V100M780,100V0.6193078324225922h9V100M790,100V1.3114754098360635h9V100M800,100V0.0364298724954466h9V100M810,100V0.5828779599271456h9V100M820,100V23.205828779599273h9V100M830,100V9.690346083788697h9V100M840,100V0.6921675774134854h9V100M850,100V1.2386156648451845h9V100M860,100V0.43715846994535923h9V100M870,100V0.7650273224043787h9V100M880,100V0h9V100M890,100V23.13296903460838h9V100"></path><path class="foreground bar" clip-path="url(#clip-3)" d="M0,100V26.55737704918033h9V100M10,100V3.351548269581059h9V100M20,100V2.9508196721311464h9V100M30,100V3.0236794171220396h9V100M40,100V2.841530054644821h9V100M50,100V21.89435336976321h9V100M60,100V6.010928961748633h9V100M70,100V2.5865209471766804h9V100M80,100V2.440801457194894h9V100M90,100V6.375227686703099h9V100M100,100V4.881602914389802h9V100M110,100V3.533697632058292h9V100M120,100V21.530054644808743h9V100M130,100V5.8287795992713995h9V100M140,100V1.7850637522768693h9V100M150,100V5.573770491803273h9V100M160,100V2.003642987249549h9V100M170,100V2.185792349726782h9V100M180,100V2.185792349726782h9V100M190,100V24.26229508196721h9V100M200,100V11.402550091074687h9V100M210,100V1.34790528233151h9V100M220,100V1.0564663023679373h9V100M230,100V2.440801457194894h9V100M240,100V2.003642987249549h9V100M250,100V1.4207650273224033h9V100M260,100V24.59016393442623h9V100M270,100V11.183970856101993h9V100M280,100V3.533697632058292h9V100M290,100V2.2222222222222285h9V100M300,100V1.34790528233151h9V100M310,100V1.4207650273224033h9V100M320,100V0.983606557377044h9V100M330,100V23.788706739526404h9V100M340,100V10.892531876138435h9V100M350,100V2.258652094717675h9V100M360,100V1.8579234972677483h9V100M370,100V3.0236794171220396h9V100M380,100V1.34790528233151h9V100M390,100V3.2058287795992726h9V100M400,100V23.86156648451731h9V100M410,100V10.346083788706736h9V100M420,100V2.6593806921675736h9V100M430,100V5.100182149362482h9V100M440,100V2.7322404371584668h9V100M450,100V2.4772313296903405h9V100M460,100V0.983606557377044h9V100M470,100V23.60655737704917h9V100M480,100V10.491803278688522h9V100M490,100V1.0200364298724907h9V100M500,100V1.4571948998178499h9V100M510,100V1.5664845173041897h9V100M520,100V1.0564663023679373h9V100M530,100V1.712204007285976h9V100M540,100V24.553734061930783h9V100M550,100V10.965391621129328h9V100M560,100V1.7486338797814227h9V100M570,100V2.877959927140253h9V100M580,100V5.683060109289613h9V100M590,100V1.9307832422586557h9V100M600,100V0.983606557377044h9V100M610,100V24.225865209471763h9V100M620,100V10.856102003642988h9V100M630,100V3.096539162112933h9V100M640,100V3.3879781420764914h9V100M650,100V2.076502732240442h9V100M660,100V2.1129326047358887h9V100M670,100V0.8743169398907042h9V100M680,100V23.497267759562845h9V100M690,100V9.836065573770497h9V100M700,100V1.0928961748633839h9V100M710,100V1.7486338797814227h9V100M720,100V1.712204007285976h9V100M730,100V0.6921675774134854h9V100M740,100V0.6921675774134854h9V100M750,100V22.877959927140253h9V100M760,100V9.690346083788697h9V100M770,100V0.546448087431699h9V100M780,100V0.6193078324225922h9V100M790,100V1.3114754098360635h9V100M800,100V0.0364298724954466h9V100M810,100V0.5828779599271456h9V100M820,100V23.205828779599273h9V100M830,100V9.690346083788697h9V100M840,100V0.6921675774134854h9V100M850,100V1.2386156648451845h9V100M860,100V0.43715846994535923h9V100M870,100V0.7650273224043787h9V100M880,100V0h9V100M890,100V23.13296903460838h9V100"></path><g class="axis" transform="translate(0,100)"><g class="tick" transform="translate(60,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Jan 07</text></g><g class="tick" transform="translate(130,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Jan 14</text></g><g class="tick" transform="translate(200,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Jan 21</text></g><g class="tick" transform="translate(270,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Jan 28</text></g><g class="tick" transform="translate(340,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Feb 04</text></g><g class="tick" transform="translate(410,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Feb 11</text></g><g class="tick" transform="translate(480,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Feb 18</text></g><g class="tick" transform="translate(550,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Feb 25</text></g><g class="tick" transform="translate(620,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Mar 04</text></g><g class="tick" transform="translate(690,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Mar 11</text></g><g class="tick" transform="translate(760,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Mar 18</text></g><g class="tick" transform="translate(830,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">Mar 25</text></g><g class="tick" transform="translate(900,0)" style="opacity: 1;"><line y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">April</text></g><path class="domain" d="M0,6V0H900V6"></path></g><g class="brush" style="pointer-events: all; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><rect class="background" x="0" width="900" height="100" style="visibility: hidden; cursor: crosshair;"></rect><rect class="extent" x="310" width="300" height="100" style="cursor: move;"></rect><g class="resize e" transform="translate(610,0)" style="cursor: ew-resize;"><rect x="-3" width="6" height="100" style="visibility: hidden;"></rect><path d="M0.5,33.333333333333336A6,6 0 0 1 6.5,39.333333333333336V60.66666666666667A6,6 0 0 1 0.5,66.66666666666667ZM2.5,41.333333333333336V58.66666666666667M4.5,41.333333333333336V58.66666666666667"></path></g><g class="resize w" transform="translate(310,0)" style="cursor: ew-resize;"><rect x="-3" width="6" height="100" style="visibility: hidden;"></rect><path d="M-0.5,33.333333333333336A6,6 0 0 0 -6.5,39.333333333333336V60.66666666666667A6,6 0 0 0 -0.5,66.66666666666667ZM-2.5,41.333333333333336V58.66666666666667M-4.5,41.333333333333336V58.66666666666667"></path></g></g></g></svg></div>
+</div>
+
+<aside id="totals"><span id="active">77,228</span> of <span id="total">231,083</span> flights selected.</aside>
+
+<div id="lists">
+  <div id="flight-list" class="list"><div class="date"><div class="day">March 02, 2001</div><div class="flight"><div class="time">11:50 PM</div><div class="origin">PHX</div><div class="destination">SAT</div><div class="distance">843 mi.</div><div class="delay">+210 min.</div></div><div class="flight"><div class="time">11:50 PM</div><div class="origin">MCI</div><div class="destination">MDW</div><div class="distance">405 mi.</div><div class="delay">+0 min.</div></div><div class="flight"><div class="time">11:42 PM</div><div class="origin">LAX</div><div class="destination">LAS</div><div class="distance">236 mi.</div><div class="delay">+35 min.</div></div><div class="flight"><div class="time">11:40 PM</div><div class="origin">SMF</div><div class="destination">ONT</div><div class="distance">389 mi.</div><div class="delay">+56 min.</div></div><div class="flight"><div class="time">11:40 PM</div><div class="origin">LAS</div><div class="destination">OAK</div><div class="distance">407 mi.</div><div class="delay">+103 min.</div></div><div class="flight"><div class="time">11:27 PM</div><div class="origin">PHX</div><div class="destination">ONT</div><div class="distance">325 mi.</div><div class="delay">+11 min.</div></div><div class="flight"><div class="time">11:25 PM</div><div class="origin">PHX</div><div class="destination">LAS</div><div class="distance">256 mi.</div><div class="delay">+110 min.</div></div><div class="flight"><div class="time">11:22 PM</div><div class="origin">LAX</div><div class="destination">SMF</div><div class="distance">373 mi.</div><div class="delay">+94 min.</div></div><div class="flight"><div class="time">11:21 PM</div><div class="origin">PHX</div><div class="destination">ABQ</div><div class="distance">328 mi.</div><div class="delay">+80 min.</div></div><div class="flight"><div class="time">11:19 PM</div><div class="origin">LAS</div><div class="destination">PHX</div><div class="distance">256 mi.</div><div class="delay">+78 min.</div></div><div class="flight"><div class="time">11:17 PM</div><div class="origin">SEA</div><div class="destination">GEG</div><div class="distance">224 mi.</div><div class="delay">+77 min.</div></div><div class="flight"><div class="time">11:16 PM</div><div class="origin">TPA</div><div class="destination">FLL</div><div class="distance">197 mi.</div><div class="delay">+58 min.</div></div><div class="flight"><div class="time">11:13 PM</div><div class="origin">GEG</div><div class="destination">SEA</div><div class="distance">224 mi.</div><div class="delay">+147 min.</div></div><div class="flight"><div class="time">11:00 PM</div><div class="origin">ONT</div><div class="destination">OAK</div><div class="distance">361 mi.</div><div class="delay">+50 min.</div></div><div class="flight"><div class="time">11:00 PM</div><div class="origin">LAX</div><div class="destination">PHX</div><div class="distance">370 mi.</div><div class="delay">+49 min.</div></div><div class="flight"><div class="time">11:00 PM</div><div class="origin">STL</div><div class="destination">MDW</div><div class="distance">251 mi.</div><div class="delay">+49 min.</div></div><div class="flight"><div class="time">11:00 PM</div><div class="origin">PHX</div><div class="destination">LAX</div><div class="distance">370 mi.</div><div class="delay">+27 min.</div></div><div class="flight"><div class="time">11:00 PM</div><div class="origin">TPA</div><div class="destination">FLL</div><div class="distance">197 mi.</div><div class="delay">+112 min.</div></div><div class="flight"><div class="time">10:55 PM</div><div class="origin">SJC</div><div class="destination">LAS</div><div class="distance">386 mi.</div><div class="delay">+83 min.</div></div><div class="flight"><div class="time">10:55 PM</div><div class="origin">STL</div><div class="destination">MDW</div><div class="distance">251 mi.</div><div class="delay">+2 min.</div></div><div class="flight"><div class="time">10:49 PM</div><div class="origin">SAT</div><div class="destination">DAL</div><div class="distance">248 mi.</div><div class="delay">+41 min.</div></div><div class="flight"><div class="time">10:49 PM</div><div class="origin">LAS</div><div class="destination">LAX</div><div class="distance">236 mi.</div><div class="delay">+3 min.</div></div><div class="flight"><div class="time">10:46 PM</div><div class="origin">SAN</div><div class="destination">SMF</div><div class="distance">480 mi.</div><div class="delay">+28 min.</div></div><div class="flight"><div class="time">10:45 PM</div><div class="origin">PHX</div><div class="destination">LAS</div><div class="distance">256 mi.</div><div class="delay">+102 min.</div></div><div class="flight"><div class="time">10:45 PM</div><div class="origin">LAS</div><div class="destination">SLC</div><div class="distance">368 mi.</div><div class="delay">+20 min.</div></div><div class="flight"><div class="time">10:45 PM</div><div class="origin">ONT</div><div class="destination">SMF</div><div class="distance">389 mi.</div><div class="delay">+50 min.</div></div><div class="flight"><div class="time">10:42 PM</div><div class="origin">HOU</div><div class="destination">LAS</div><div class="distance">1,235 mi.</div><div class="delay">+40 min.</div></div><div class="flight"><div class="time">10:39 PM</div><div class="origin">LAS</div><div class="destination">ABQ</div><div class="distance">487 mi.</div><div class="delay">+50 min.</div></div><div class="flight"><div class="time">10:38 PM</div><div class="origin">STL</div><div class="destination">CLE</div><div class="distance">487 mi.</div><div class="delay">+78 min.</div></div><div class="flight"><div class="time">10:36 PM</div><div class="origin">MSY</div><div class="destination">HOU</div><div class="distance">303 mi.</div><div class="delay">+14 min.</div></div><div class="flight"><div class="time">10:35 PM</div><div class="origin">HOU</div><div class="destination">MSY</div><div class="distance">303 mi.</div><div class="delay">+42 min.</div></div><div class="flight"><div class="time">10:35 PM</div><div class="origin">PHX</div><div class="destination">SAN</div><div class="distance">304 mi.</div><div class="delay">+10 min.</div></div><div class="flight"><div class="time">10:30 PM</div><div class="origin">HOU</div><div class="destination">MSY</div><div class="distance">303 mi.</div><div class="delay">+6 min.</div></div><div class="flight"><div class="time">10:28 PM</div><div class="origin">BWI</div><div class="destination">RDU</div><div class="distance">255 mi.</div><div class="delay">+72 min.</div></div><div class="flight"><div class="time">10:27 PM</div><div class="origin">PHX</div><div class="destination">SAN</div><div class="distance">304 mi.</div><div class="delay">+32 min.</div></div><div class="flight"><div class="time">10:25 PM</div><div class="origin">SMF</div><div class="destination">SAN</div><div class="distance">480 mi.</div><div class="delay">+40 min.</div></div><div class="flight"><div class="time">10:25 PM</div><div class="origin">LAX</div><div class="destination">OAK</div><div class="distance">337 mi.</div><div class="delay">+57 min.</div></div><div class="flight"><div class="time">10:25 PM</div><div class="origin">OAK</div><div class="destination">LAS</div><div class="distance">407 mi.</div><div class="delay">+65 min.</div></div><div class="flight"><div class="time">10:23 PM</div><div class="origin">AUS</div><div class="destination">ELP</div><div class="distance">528 mi.</div><div class="delay">+5 min.</div></div><div class="flight"><div class="time">10:22 PM</div><div class="origin">PHX</div><div class="destination">LAX</div><div class="distance">370 mi.</div><div class="delay">+55 min.</div></div></div></div>
+</div>
+
+<footer>
+  <span style="float:right;">
+    Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License 2.0</a>.
+  </span>
+  Copyright 2012 <a href="http://squareup.com/">Square, Inc.</a>
+</footer>
+
+</div>
+
+<a href="https://github.com/square/crossfilter"><img style="position: absolute; top: 0; right: 0; border: 0;" src="./Crossfilter_files/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+<script src="./Crossfilter_files/crossfilter.v1.min.js"></script>
+<script src="./Crossfilter_files/d3.v3.min.js"></script>
+<script>
+
+// (It's CSV, but GitHub Pages only gzip's JSON at the moment.)
+d3.csv("flights-3m.json", function(error, flights) {
+
+  // Various formatters.
+  var formatNumber = d3.format(",d"),
+      formatChange = d3.format("+,d"),
+      formatDate = d3.time.format("%B %d, %Y"),
+      formatTime = d3.time.format("%I:%M %p");
+
+  // A nest operator, for grouping the flight list.
+  var nestByDate = d3.nest()
+      .key(function(d) { return d3.time.day(d.date); });
+
+  // A little coercion, since the CSV is untyped.
+  flights.forEach(function(d, i) {
+    d.index = i;
+    d.date = parseDate(d.date);
+    d.delay = +d.delay;
+    d.distance = +d.distance;
+  });
+
+  // Create the crossfilter for the relevant dimensions and groups.
+  var flight = crossfilter(flights),
+      all = flight.groupAll(),
+      date = flight.dimension(function(d) { return d.date; }),
+      dates = date.group(d3.time.day),
+      hour = flight.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; }),
+      hours = hour.group(Math.floor),
+      delay = flight.dimension(function(d) { return Math.max(-60, Math.min(149, d.delay)); }),
+      delays = delay.group(function(d) { return Math.floor(d / 10) * 10; }),
+      distance = flight.dimension(function(d) { return Math.min(1999, d.distance); }),
+      distances = distance.group(function(d) { return Math.floor(d / 50) * 50; });
+
+  var charts = [
+
+    barChart()
+        .dimension(hour)
+        .group(hours)
+      .x(d3.scale.linear()
+        .domain([0, 24])
+        .rangeRound([0, 10 * 24])),
+
+    barChart()
+        .dimension(delay)
+        .group(delays)
+      .x(d3.scale.linear()
+        .domain([-60, 150])
+        .rangeRound([0, 10 * 21])),
+
+    barChart()
+        .dimension(distance)
+        .group(distances)
+      .x(d3.scale.linear()
+        .domain([0, 2000])
+        .rangeRound([0, 10 * 40])),
+
+    barChart()
+        .dimension(date)
+        .group(dates)
+        .round(d3.time.day.round)
+      .x(d3.time.scale()
+        .domain([new Date(2001, 0, 1), new Date(2001, 3, 1)])
+        .rangeRound([0, 10 * 90]))
+        .filter([new Date(2001, 1, 1), new Date(2001, 2, 1)])
+
+  ];
+
+  // Given our array of charts, which we assume are in the same order as the
+  // .chart elements in the DOM, bind the charts to the DOM and render them.
+  // We also listen to the chart's brush events to update the display.
+  var chart = d3.selectAll(".chart")
+      .data(charts)
+      .each(function(chart) { chart.on("brush", renderAll).on("brushend", renderAll); });
+
+  // Render the initial lists.
+  var list = d3.selectAll(".list")
+      .data([flightList]);
+
+  // Render the total.
+  d3.selectAll("#total")
+      .text(formatNumber(flight.size()));
+
+  renderAll();
+
+  // Renders the specified chart or list.
+  function render(method) {
+    d3.select(this).call(method);
+  }
+
+  // Whenever the brush moves, re-rendering everything.
+  function renderAll() {
+    chart.each(render);
+    list.each(render);
+    d3.select("#active").text(formatNumber(all.value()));
+  }
+
+  // Like d3.time.format, but faster.
+  function parseDate(d) {
+    return new Date(2001,
+        d.substring(0, 2) - 1,
+        d.substring(2, 4),
+        d.substring(4, 6),
+        d.substring(6, 8));
+  }
+
+  window.filter = function(filters) {
+    filters.forEach(function(d, i) { charts[i].filter(d); });
+    renderAll();
+  };
+
+  window.reset = function(i) {
+    charts[i].filter(null);
+    renderAll();
+  };
+
+  function flightList(div) {
+    var flightsByDate = nestByDate.entries(date.top(40));
+
+    div.each(function() {
+      var date = d3.select(this).selectAll(".date")
+          .data(flightsByDate, function(d) { return d.key; });
+
+      date.enter().append("div")
+          .attr("class", "date")
+        .append("div")
+          .attr("class", "day")
+          .text(function(d) { return formatDate(d.values[0].date); });
+
+      date.exit().remove();
+
+      var flight = date.order().selectAll(".flight")
+          .data(function(d) { return d.values; }, function(d) { return d.index; });
+
+      var flightEnter = flight.enter().append("div")
+          .attr("class", "flight");
+
+      flightEnter.append("div")
+          .attr("class", "time")
+          .text(function(d) { return formatTime(d.date); });
+
+      flightEnter.append("div")
+          .attr("class", "origin")
+          .text(function(d) { return d.origin; });
+
+      flightEnter.append("div")
+          .attr("class", "destination")
+          .text(function(d) { return d.destination; });
+
+      flightEnter.append("div")
+          .attr("class", "distance")
+          .text(function(d) { return formatNumber(d.distance) + " mi."; });
+
+      flightEnter.append("div")
+          .attr("class", "delay")
+          .classed("early", function(d) { return d.delay < 0; })
+          .text(function(d) { return formatChange(d.delay) + " min."; });
+
+      flight.exit().remove();
+
+      flight.order();
+    });
+  }
+
+  function barChart() {
+    if (!barChart.id) barChart.id = 0;
+
+    var margin = {top: 10, right: 10, bottom: 20, left: 10},
+        x,
+        y = d3.scale.linear().range([100, 0]),
+        id = barChart.id++,
+        axis = d3.svg.axis().orient("bottom"),
+        brush = d3.svg.brush(),
+        brushDirty,
+        dimension,
+        group,
+        round;
+
+    function chart(div) {
+      var width = x.range()[1],
+          height = y.range()[0];
+
+      y.domain([0, group.top(1)[0].value]);
+
+      div.each(function() {
+        var div = d3.select(this),
+            g = div.select("g");
+
+        // Create the skeletal chart.
+        if (g.empty()) {
+          div.select(".title").append("a")
+              .attr("href", "javascript:reset(" + id + ")")
+              .attr("class", "reset")
+              .text("reset")
+              .style("display", "none");
+
+          g = div.append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          g.append("clipPath")
+              .attr("id", "clip-" + id)
+            .append("rect")
+              .attr("width", width)
+              .attr("height", height);
+
+          g.selectAll(".bar")
+              .data(["background", "foreground"])
+            .enter().append("path")
+              .attr("class", function(d) { return d + " bar"; })
+              .datum(group.all());
+
+          g.selectAll(".foreground.bar")
+              .attr("clip-path", "url(#clip-" + id + ")");
+
+          g.append("g")
+              .attr("class", "axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(axis);
+
+          // Initialize the brush component with pretty resize handles.
+          var gBrush = g.append("g").attr("class", "brush").call(brush);
+          gBrush.selectAll("rect").attr("height", height);
+          gBrush.selectAll(".resize").append("path").attr("d", resizePath);
+        }
+
+        // Only redraw the brush if set externally.
+        if (brushDirty) {
+          brushDirty = false;
+          g.selectAll(".brush").call(brush);
+          div.select(".title a").style("display", brush.empty() ? "none" : null);
+          if (brush.empty()) {
+            g.selectAll("#clip-" + id + " rect")
+                .attr("x", 0)
+                .attr("width", width);
+          } else {
+            var extent = brush.extent();
+            g.selectAll("#clip-" + id + " rect")
+                .attr("x", x(extent[0]))
+                .attr("width", x(extent[1]) - x(extent[0]));
+          }
+        }
+
+        g.selectAll(".bar").attr("d", barPath);
+      });
+
+      function barPath(groups) {
+        var path = [],
+            i = -1,
+            n = groups.length,
+            d;
+        while (++i < n) {
+          d = groups[i];
+          path.push("M", x(d.key), ",", height, "V", y(d.value), "h9V", height);
+        }
+        return path.join("");
+      }
+
+      function resizePath(d) {
+        var e = +(d == "e"),
+            x = e ? 1 : -1,
+            y = height / 3;
+        return "M" + (.5 * x) + "," + y
+            + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6)
+            + "V" + (2 * y - 6)
+            + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y)
+            + "Z"
+            + "M" + (2.5 * x) + "," + (y + 8)
+            + "V" + (2 * y - 8)
+            + "M" + (4.5 * x) + "," + (y + 8)
+            + "V" + (2 * y - 8);
+      }
+    }
+
+    brush.on("brushstart.chart", function() {
+      var div = d3.select(this.parentNode.parentNode.parentNode);
+      div.select(".title a").style("display", null);
+    });
+
+    brush.on("brush.chart", function() {
+      var g = d3.select(this.parentNode),
+          extent = brush.extent();
+      if (round) g.select(".brush")
+          .call(brush.extent(extent = extent.map(round)))
+        .selectAll(".resize")
+          .style("display", null);
+      g.select("#clip-" + id + " rect")
+          .attr("x", x(extent[0]))
+          .attr("width", x(extent[1]) - x(extent[0]));
+      dimension.filterRange(extent);
+    });
+
+    brush.on("brushend.chart", function() {
+      if (brush.empty()) {
+        var div = d3.select(this.parentNode.parentNode.parentNode);
+        div.select(".title a").style("display", "none");
+        div.select("#clip-" + id + " rect").attr("x", null).attr("width", "100%");
+        dimension.filterAll();
+      }
+    });
+
+    chart.margin = function(_) {
+      if (!arguments.length) return margin;
+      margin = _;
+      return chart;
+    };
+
+    chart.x = function(_) {
+      if (!arguments.length) return x;
+      x = _;
+      axis.scale(x);
+      brush.x(x);
+      return chart;
+    };
+
+    chart.y = function(_) {
+      if (!arguments.length) return y;
+      y = _;
+      return chart;
+    };
+
+    chart.dimension = function(_) {
+      if (!arguments.length) return dimension;
+      dimension = _;
+      return chart;
+    };
+
+    chart.filter = function(_) {
+      if (_) {
+        brush.extent(_);
+        dimension.filterRange(_);
+      } else {
+        brush.clear();
+        dimension.filterAll();
+      }
+      brushDirty = true;
+      return chart;
+    };
+
+    chart.group = function(_) {
+      if (!arguments.length) return group;
+      group = _;
+      return chart;
+    };
+
+    chart.round = function(_) {
+      if (!arguments.length) return round;
+      round = _;
+      return chart;
+    };
+
+    return d3.rebind(chart, brush, "on");
+  }
+});
+
+</script>
+</body></html>
