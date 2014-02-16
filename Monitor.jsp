@@ -71,6 +71,18 @@ h1, h2 {
   padding: 10px 0;
 }
 
+.Max{
+}
+
+.Min{
+}
+
+.Avg{
+}
+
+.hidden { 
+display: none; 
+}
 .chart {
   display: inline-block;
   height: 151px;
@@ -171,6 +183,12 @@ aside {
 }
 
 </style>
+<div id="option">
+    <input type="checkbox"  class="messageCheckbox" value="Max"/>Maximum
+    <input type="checkbox"  class="messageCheckbox" value="Min"/>Minimum
+    <input type="checkbox" class="messageCheckbox" id="AVG" value="Average""/>Average
+    <input type="checkbox"  class="messageCheckbox" id="USER" value="User""/>User
+</div>
 
 <div id="body">
 
@@ -217,6 +235,7 @@ var svg = d3.select("body").append("svg")
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
 
 d3.csv("1.csv", function(error, data) {
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Timestamp"; }));
@@ -266,8 +285,8 @@ d3.csv("1.csv", function(error, data) {
       .attr("class", "city");
 
   city.append("path")
-      .attr("class", "line")
-      .attr("d", function(d) {  return line(d.values); })
+      .attr("class", function(d) { return "line " +  d.name})
+      .attr("d", function(d) { return line(d.values); })
       .style("stroke", function(d) { return color(d.name); });
 
   city.append("text")
@@ -277,5 +296,12 @@ d3.csv("1.csv", function(error, data) {
       .attr("dy", ".35em")
       .text(function(d) { return d.name; });
 });
+
+d3.selectAll('.messageCheckbox').on('click', function () {
+    var value = this.value,
+        checked = this.checked;
+    d3.select('.' + value).classed('hidden', !checked);
+});
+
 
 </script>
