@@ -193,12 +193,6 @@ aside {
 
 <aside id="totals"><span id="active">-</span> of <span id="total">-</span> records selected.</aside>
 
-<div id="lists">
-  <div id="flight-list" class="list"></div>
-</div>
-
-
-
 </div>
 
 <script src="crossfilter.js"></script>
@@ -229,6 +223,12 @@ d3.csv("stats4.csv", function(error, flights) {
     d.distance = +d.distance;
   });
 
+var delayMin = d3.min(flights, function(d){ return Math.min(d.delay); });
+var delayMax = d3.max(flights, function(d){ return Math.max(d.delay); });
+
+var distanceMin = d3.min(flights, function(d){ return Math.min(d.distance); });
+var distanceMax = d3.max(flights, function(d){ return Math.max(d.distance); });
+
   // Create the crossfilter for the relevant dimensions and groups.
   var flight = crossfilter(flights),
       all = flight.groupAll(),
@@ -236,17 +236,10 @@ d3.csv("stats4.csv", function(error, flights) {
       dates = date.group(d3.time.day),
       hour = flight.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; }),
       hours = hour.group(Math.floor),
-      delay = flight.dimension(function(d) { return Math.max(-60, Math.min(149, d.delay)); }),
+      delay = flight.dimension(function(d) { return Math.max(delayMin, Math.min(delayMax, d.delay)); }),
       delays = delay.group(function(d) { return Math.floor(d / 10) * 10; }),
       distance = flight.dimension(function(d) { return Math.min(1999, d.distance); }),
       distances = distance.group(function(d) { return Math.floor(d / 50) * 50; });
-
-
-var delayMin = d3.min(flights, function(d){ return Math.min(d.delay); });
-var delayMax = d3.max(flights, function(d){ return Math.max(d.delay); });
-
-var distanceMin = d3.min(flights, function(d){ return Math.min(d.distance); });
-var distanceMax = d3.max(flights, function(d){ return Math.max(d.distance); });
 
   var charts = [
 
@@ -586,7 +579,7 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.csv("stats3.csv", function(error, data) {
+d3.csv("1.csv", function(error, data) {
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Timestamp"; }));
 
   data.forEach(function(d) {
@@ -594,6 +587,7 @@ d3.csv("stats3.csv", function(error, data) {
     d.Min = +d.Min;
     d.Max = +d.Max;
     d.Average = +d.Average;
+    d.User = +d.User;
   });
 
   var cities = color.domain().map(function(name) {
@@ -634,7 +628,7 @@ d3.csv("stats3.csv", function(error, data) {
 
   city.append("path")
       .attr("class", "line")
-      .attr("d", function(d) { return line(d.values); })
+      .attr("d", function(d) {  return line(d.values); })
       .style("stroke", function(d) { return color(d.name); });
 
   city.append("text")
