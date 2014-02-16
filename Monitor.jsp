@@ -184,10 +184,10 @@ aside {
 
 </style>
 <div id="option">
-    <input type="checkbox"  class="messageCheckbox" value="Max"/>Maximum
-    <input type="checkbox"  class="messageCheckbox" value="Min"/>Minimum
-    <input type="checkbox" class="messageCheckbox" id="AVG" value="Average""/>Average
-    <input type="checkbox"  class="messageCheckbox" id="USER" value="User""/>User
+    <input type="checkbox" checked="checked" class="messageCheckbox" value="Max"/>Maximum
+    <input type="checkbox"  checked="checked" class="messageCheckbox" value="Min"/>Minimum
+    <input type="checkbox" checked="checked"  class="messageCheckbox" id="AVG" value="Average""/>Average
+    <input type="checkbox" checked="checked"  class="messageCheckbox" id="USER" value="User""/>User
 </div>
 
 <div id="body">
