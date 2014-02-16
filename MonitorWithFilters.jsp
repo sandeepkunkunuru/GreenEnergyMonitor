@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+<%@ page import="java.sql.*" %>
+<%@ page import="org.sqlite.*" %>
+<%@ page import="org.apache.commons.lang3.*" %>
+
 <meta charset="utf-8">
 <style>
 
@@ -195,11 +199,38 @@ aside {
 
 </div>
 
+            <%
+                Class.forName("org.sqlite.JDBC");
+                Connection conn =
+                     DriverManager.getConnection("jdbc:sqlite:/home/kunkunur/dev/tools/apache-tomcat-7.0.30/webapps/energy/db/original.db");
+                Statement stat = conn.createStatement();
+		String id = request.getParameter("id");
+		id = id == null? "1": id;
+		String sql = "SELECT datetime(stats.timestamp, 'unixepoch') as Timestamp, average || '.0' as Average, maximum || '.0' as Max, minimum || '.0' as Min,value || '.0' as User " + 
+				" from stats,usage where usage.id = " + id + " and stats.timestamp = usage.timestamp limit 100";
+ 
+                ResultSet rs = stat.executeQuery(sql);
+ 		
+		String csv = "Timestamp,Average,Max,Min,User\n";
+                while (rs.next()) {
+                    csv = csv + rs.getString("Timestamp") + ",";
+                    csv = csv + rs.getString("Average") + ",";
+		    csv = csv + rs.getString("Max") + ",";
+		    csv = csv + rs.getString("Min") + ",";
+		    csv = csv + rs.getString("User") + "\n";
+                }
+		
+		System.out.println(csv);
+ 
+                rs.close();
+                conn.close();
+            %>
 <script src="crossfilter.js"></script>
 <script src="d3.v3.min.js"></script>
 
 <script>
 
+var csv_string = '<%=  StringEscapeUtils.escapeEcmaScript(csv) %>';
 var parseTimestamp = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
 
 // (It's CSV, but GitHub Pages only gzip's JSON at the moment.)
@@ -579,7 +610,7 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.csv("1.csv", function(error, data) {
+d3.csv.parse(csv_string, function(error, data) {
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Timestamp"; }));
 
   data.forEach(function(d) {

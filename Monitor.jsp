@@ -180,6 +180,8 @@ aside {
 <script src="crossfilter.js"></script>
 <script src="d3.v3.min.js"></script>
 
+
+
 <script>
 
 var parseTimestamp = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
