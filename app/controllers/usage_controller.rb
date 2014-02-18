@@ -1,6 +1,13 @@
 class UsageController < ApplicationController
   before_action :set_usage, only: [:show, :edit, :update, :destroy]
 
+  # GET /
+  def monitor
+    @usage = Usage.paginate(:page => params[:page])
+
+    render "#{Rails.root}/public/Monitor.html"
+  end
+
   # GET /usage
   # GET /usage.json
   def index

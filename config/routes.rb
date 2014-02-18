@@ -5,6 +5,8 @@ Greenenergymonitor::Application.routes.draw do
 
   resources :users
 
+  root 'usage#monitor'
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
