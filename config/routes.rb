@@ -1,4 +1,6 @@
 Greenenergymonitor::Application.routes.draw do
+  resources :usage
+
   resources :stats
 
   resources :users

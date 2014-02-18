@@ -1,0 +1,31 @@
+<h1>Listing usage</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Timestamp</th>
+      <th>Value</th>     
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @usage.each do |usage| %>
+      <tr>
+        <td><%= usage.user_id %></td>
+        <td><%= usage.timestamp %></td>
+        <td><%= usage.value %></td>
+        <td><%= link_to 'Show', usage %></td>
+        <td><%= link_to 'Edit', edit_usage_path(usage) %></td>
+        <td><%= link_to 'Destroy', usage, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+<%= will_paginate @usage %>
+<%= link_to 'New Usage', new_usage_path %>
