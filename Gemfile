@@ -44,6 +44,8 @@ end
 
 gem 'trinidad'
 gem 'will_paginate'
+gem "d3-rails"
+gem 'rickshaw_rails'
 
 group :assets do
   gem 'twitter-bootstrap-rails'
