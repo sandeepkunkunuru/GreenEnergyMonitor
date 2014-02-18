@@ -1,0 +1,33 @@
+<h1>Listing stats</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Timestamp</th>
+      <th>Average</th>
+      <th>Maximum</th>
+      <th>Minimum</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @stats.each do |stat| %>
+      <tr>
+        <td><%= stat.timestamp %></td>
+        <td><%= stat.average %></td>
+        <td><%= stat.maximum %></td>
+        <td><%= stat.minimum %></td>
+        <td><%= link_to 'Show', stat %></td>
+        <td><%= link_to 'Edit', edit_stat_path(stat) %></td>
+        <td><%= link_to 'Destroy', stat, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Stat', new_stat_path %>

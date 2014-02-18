@@ -1,0 +1,4 @@
+.mode insert stats
+.output insert.sql
+select * from stats; -- place the needed select query here
+.output stdout

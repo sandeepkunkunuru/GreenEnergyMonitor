@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  timestamp: 1
+  average: 1
+  maximum: 1
+  minimum: 1
+
+two:
+  timestamp: 1
+  average: 1
+  maximum: 1
+  minimum: 1

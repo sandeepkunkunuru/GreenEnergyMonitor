@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Timestamp:</strong>
+  <%= @stat.timestamp %>
+</p>
+
+<p>
+  <strong>Average:</strong>
+  <%= @stat.average %>
+</p>
+
+<p>
+  <strong>Maximum:</strong>
+  <%= @stat.maximum %>
+</p>
+
+<p>
+  <strong>Minimum:</strong>
+  <%= @stat.minimum %>
+</p>
+
+<%= link_to 'Edit', edit_stat_path(@stat) %> |
+<%= link_to 'Back', stats_path %>
