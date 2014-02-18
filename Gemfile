@@ -7,7 +7,8 @@ gem 'rails', '4.0.0'
 gem 'activerecord-jdbcsqlite3-adapter'
 
 # Use SCSS for stylesheets
-gem 'sass-rails', '~> 4.0.0'
+#gem 'sass-rails', '~> 4.0.0'
+gem "less-rails"
 
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
@@ -42,3 +43,8 @@ end
 # gem 'capistrano', group: :development
 
 gem 'trinidad'
+gem 'will_paginate'
+
+group :assets do
+  gem 'twitter-bootstrap-rails'
+end
