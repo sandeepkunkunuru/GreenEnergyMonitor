@@ -1,3 +1,5 @@
+<h1>User's Energy Consumption Value vs Average, Maximum, Minimum</h1>
+
 <div id="option">
     <input type="checkbox" checked="checked" class="messageCheckbox" value="Max"/>Maximum
     <input type="checkbox" checked="checked" class="messageCheckbox" value="Min"/>Minimum
@@ -5,105 +7,330 @@
     <input type="checkbox" checked="checked"  class="messageCheckbox" id="USER" value="User"/>User
 </div>
 
+<br>
+<br>
+
 <script>
+var d3_sample_chart = function(){
+  var parseTimestamp = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
 
-var parseTimestamp = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+  var margin = {top: 20, right: 80, bottom: 30, left: 50},
+      width = 960 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
 
-var margin = {top: 20, right: 80, bottom: 30, left: 50},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+  var x = d3.time.scale()
+      .range([0, width]);
 
-var x = d3.time.scale()
-    .range([0, width]);
+  var y = d3.scale.linear()
+      .range([height, 0]);
 
-var y = d3.scale.linear()
-    .range([height, 0]);
+  var color = d3.scale.category10();
 
-var color = d3.scale.category10();
+  var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom");
 
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom");
+  var yAxis = d3.svg.axis()
+      .scale(y)
+      .orient("left");
 
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
+  var line = d3.svg.line()
+      .interpolate("basis")
+      .x(function(d) { return x(d.Timestamp); })
+      .y(function(d) { return y(d.usage); });
 
-var line = d3.svg.line()
-    .interpolate("basis")
-    .x(function(d) { return x(d.Timestamp); })
-    .y(function(d) { return y(d.usage); });
+  var svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  d3.json("/dashboard/data.json?user_id=1&limit=100", function(error, data) {
+    color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Timestamp"; }));
 
-d3.json("/dashboard/data.json?user_id=1&limit=100", function(error, data) {
-  color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Timestamp"; }));
+    data.forEach(function(d) {
+      d.Timestamp = parseTimestamp(d.Timestamp);
+      d.Min = +d.Min;
+      d.Max = +d.Max;
+      d.Average = +d.Average;
+      d.Value = +d.Value;
+    });
 
-  data.forEach(function(d) {
-    d.Timestamp = parseTimestamp(d.Timestamp);
-    d.Min = +d.Min;
-    d.Max = +d.Max;
-    d.Average = +d.Average;
-    d.Value = +d.Value;
+    var cities = color.domain().map(function(name) {
+      return {
+        name: name,
+        values: data.map(function(d) {
+          return {Timestamp: d.Timestamp, usage: +d[name]};
+        })
+      };
+    });
+
+    x.domain(d3.extent(data, function(d) { return d.Timestamp; }));
+
+    y.domain([
+      d3.min(cities, function(c) { return d3.min(c.values, function(v) { return v.usage; }); }),
+      d3.max(cities, function(c) { return d3.max(c.values, function(v) { return v.usage; }); })
+    ]);
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("usage");
+
+    var city = svg.selectAll(".city")
+        .data(cities)
+      .enter().append("g")
+        .attr("class", "city");
+
+    city.append("path")
+        .attr("class", function(d) { return "line " +  d.name})
+        .attr("d", function(d) { return line(d.values); })
+        .style("stroke", function(d) { return color(d.name); });
+
+    city.append("text")
+        .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+        .attr("transform", function(d) { return "translate(" + x(d.value.Timestamp) + "," + y(d.value.usage) + ")"; })
+        .attr("x", 3)
+        .attr("dy", ".35em")
+        .text(function(d) { return d.name; });
   });
 
-  var cities = color.domain().map(function(name) {
-    return {
-      name: name,
-      values: data.map(function(d) {
-        return {Timestamp: d.Timestamp, usage: +d[name]};
-      })
-    };
+  d3.selectAll('.messageCheckbox').on('click', function () {
+      var value = this.value,
+          checked = this.checked;
+      d3.select('.' + value).classed('hidden', !checked);
   });
-
-  x.domain(d3.extent(data, function(d) { return d.Timestamp; }));
-
-  y.domain([
-    d3.min(cities, function(c) { return d3.min(c.values, function(v) { return v.usage; }); }),
-    d3.max(cities, function(c) { return d3.max(c.values, function(v) { return v.usage; }); })
-  ]);
-
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("usage");
-
-  var city = svg.selectAll(".city")
-      .data(cities)
-    .enter().append("g")
-      .attr("class", "city");
-
-  city.append("path")
-      .attr("class", function(d) { return "line " +  d.name})
-      .attr("d", function(d) { return line(d.values); })
-      .style("stroke", function(d) { return color(d.name); });
-
-  city.append("text")
-      .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
-      .attr("transform", function(d) { return "translate(" + x(d.value.Timestamp) + "," + y(d.value.usage) + ")"; })
-      .attr("x", 3)
-      .attr("dy", ".35em")
-      .text(function(d) { return d.name; });
-});
-
-d3.selectAll('.messageCheckbox').on('click', function () {
-    var value = this.value,
-        checked = this.checked;
-    d3.select('.' + value).classed('hidden', !checked);
-});
-
+}
+d3_sample_chart();
 </script>
+
+<div id="content">
+
+  <form id="side_panel">
+    <h1>User's Energy Consumption Value vs Average, Maximum, Minimum Another Chart</h1>
+    <section><div id="legend"></div></section>
+    <section>
+      <div id="renderer_form" class="toggler">
+        <input type="radio" name="renderer" id="area" value="area" checked>
+        <label for="area">area</label>
+        <input type="radio" name="renderer" id="bar" value="bar">
+        <label for="bar">bar</label>
+        <input type="radio" name="renderer" id="line" value="line">
+        <label for="line">line</label>
+        <input type="radio" name="renderer" id="scatter" value="scatterplot">
+        <label for="scatter">scatter</label>
+      </div>
+    </section>
+    <section>
+      <div id="offset_form">
+        <label for="stack">
+          <input type="radio" name="offset" id="stack" value="zero" checked>
+          <span>stack</span>
+        </label>
+        <label for="stream">
+          <input type="radio" name="offset" id="stream" value="wiggle">
+          <span>stream</span>
+        </label>
+        <label for="pct">
+          <input type="radio" name="offset" id="pct" value="expand">
+          <span>pct</span>
+        </label>
+        <label for="value">
+          <input type="radio" name="offset" id="value" value="value">
+          <span>value</span>
+        </label>
+      </div>
+      <div id="interpolation_form">
+        <label for="cardinal">
+          <input type="radio" name="interpolation" id="cardinal" value="cardinal" checked>
+          <span>cardinal</span>
+        </label>
+        <label for="linear">
+          <input type="radio" name="interpolation" id="linear" value="linear">
+          <span>linear</span>
+        </label>
+        <label for="step">
+          <input type="radio" name="interpolation" id="step" value="step-after">
+          <span>step</span>
+        </label>
+      </div>
+    </section>
+    <section>
+      <h6>Smoothing</h6>
+      <div id="smoother"></div>
+    </section>
+    <section></section>
+  </form>
+
+  <div id="chart_container">
+    <div id="chart"></div>
+    <div id="timeline"></div>
+    <div id="preview"></div>
+  </div>
+
+</div>
+
+
+<script>
+var rickshaw_sample_chart = function (){
+  // set up our data series with 150 random data points
+
+  var seriesData = [ [], [], [], [], [], [] ];
+  var random = new Rickshaw.Fixtures.RandomData(150);
+
+  for (var i = 0; i < 150; i++) {
+    random.addData(seriesData);
+  }
+
+  var palette = new Rickshaw.Color.Palette( { scheme: 'classic9' } );
+
+  // instantiate our graph!
+
+  var graph = new Rickshaw.Graph( {
+    element: document.getElementById("chart"),
+    width: 900,
+    height: 500,
+    renderer: 'area',
+    stroke: true,
+    preserve: true,
+    series: [
+      {
+        color: palette.color(),
+        data: seriesData[0],
+        name: 'Maximum'
+      }, {
+        color: palette.color(),
+        data: seriesData[1],
+        name: 'Minimum'
+      }, {
+        color: palette.color(),
+        data: seriesData[2],
+        name: 'Average  '
+      }, {
+        color: palette.color(),
+        data: seriesData[3],
+        name: 'User'
+      }, 
+    ]
+  } );
+
+  graph.render();
+
+  var preview = new Rickshaw.Graph.RangeSlider.Preview( {
+    graph: graph,
+    element: document.getElementById('preview'),
+  } );
+
+  var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+    graph: graph,
+    xFormatter: function(x) {
+      return new Date(x * 1000).toString();
+    }
+  } );
+
+  var annotator = new Rickshaw.Graph.Annotate( {
+    graph: graph,
+    element: document.getElementById('timeline')
+  } );
+
+  var legend = new Rickshaw.Graph.Legend( {
+    graph: graph,
+    element: document.getElementById('legend')
+
+  } );
+
+  var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
+    graph: graph,
+    legend: legend
+  } );
+
+  var order = new Rickshaw.Graph.Behavior.Series.Order( {
+    graph: graph,
+    legend: legend
+  } );
+
+  var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
+    graph: graph,
+    legend: legend
+  } );
+
+  var smoother = new Rickshaw.Graph.Smoother( {
+    graph: graph,
+    element: $('#smoother')
+  } );
+
+  var ticksTreatment = 'glow';
+
+  var xAxis = new Rickshaw.Graph.Axis.Time( {
+    graph: graph,
+    ticksTreatment: ticksTreatment,
+    timeFixture: new Rickshaw.Fixtures.Time.Local()
+  } );
+
+  xAxis.render();
+
+  var yAxis = new Rickshaw.Graph.Axis.Y( {
+    graph: graph,
+    tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+    ticksTreatment: ticksTreatment
+  } );
+
+  yAxis.render();
+
+
+  var controls = new RenderControls( {
+    element: document.querySelector('form'),
+    graph: graph
+  } );
+
+  // add some data every so often
+
+  var messages = [
+    "Changed home page welcome message",
+    "Minified JS and CSS",
+    "Changed button color from blue to green",
+    "Refactored SQL query to use indexed columns",
+    "Added additional logging for debugging",
+    "Fixed typo",
+    "Rewrite conditional logic for clarity",
+    "Added documentation for new methods"
+  ];
+
+  setInterval( function() {
+    random.removeData(seriesData);
+    random.addData(seriesData);
+    graph.update();
+
+  }, 3000 );
+
+  function addAnnotation(force) {
+    if (messages.length > 0 && (force || Math.random() >= 0.95)) {
+      annotator.add(seriesData[2][seriesData[2].length-1].x, messages.shift());
+      annotator.update();
+    }
+  }
+
+  addAnnotation(true);
+  setTimeout( function() { setInterval( addAnnotation, 6000 ) }, 6000 );
+
+  var previewXAxis = new Rickshaw.Graph.Axis.Time({
+    graph: preview.previews[0],
+    timeFixture: new Rickshaw.Fixtures.Time.Local(),
+    ticksTreatment: ticksTreatment
+  });
+
+  previewXAxis.render();
+}
+rickshaw_sample_chart();
+</script>
+

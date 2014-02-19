@@ -22,6 +22,7 @@ gem 'therubyrhino'
 
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
+gem 'jquery-ui-rails'
 
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
 gem 'turbolinks'
@@ -45,8 +46,6 @@ end
 
 gem 'trinidad'
 gem 'will_paginate'
-gem "d3-rails"
-gem 'rickshaw_rails'
 
 group :assets do
   gem 'twitter-bootstrap-rails'

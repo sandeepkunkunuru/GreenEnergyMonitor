@@ -12,7 +12,11 @@
 //
 //= require jquery
 //= require jquery_ujs
+//= require jquery.ui.all
 //= require turbolinks
 //= require_tree .
-//= require d3
+
+//= require d3.v3
 //= require rickshaw
+//= require rickshaw_extensions
+//= require d3.layout.min
