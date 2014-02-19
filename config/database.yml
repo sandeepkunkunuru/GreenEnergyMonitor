@@ -5,8 +5,21 @@
 # gem 'activerecord-jdbcsqlite3-adapter'
 #
 development:
-  adapter: sqlite3
-  database: db/development.sqlite3
+#  adapter: sqlite3
+#  database: db/development.sqlite3
+#  pool: 1
+#  reconnect: true
+#  checkout_timeout: 7
+#  reaping_frequency: 1
+#  dead_connection_timeout: 3
+  adapter: mysql2
+  encoding: utf8 
+  database: gem 
+  pool: 5
+  username: root 
+  password: Mahalaxmi$7 
+  socket: /var/run/mysqld/mysqld.sock 
+  reconnect: true
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -16,5 +29,11 @@ test:
   database: db/test.sqlite3
 
 production:
-  adapter: sqlite3
-  database: db/production.sqlite3
+  adapter: mysql2
+  encoding: utf8 
+  database: gem 
+  pool: 5
+  username: root 
+  password: Mahalaxmi$7 
+  socket: /var/run/mysqld/mysqld.sock 
+  reconnect: true

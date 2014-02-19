@@ -1,0 +1,2 @@
+jruby_min_runtimes: 5
+jruby_max_runtimes: 100
