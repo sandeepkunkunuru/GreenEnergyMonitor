@@ -182,11 +182,52 @@ d3_sample_chart();
 
 
 <script>
+
+var Gem = new Object();
+
+Gem.Data = function(timeInterval) {
+
+  var addData;
+  timeInterval = timeInterval || 1;
+
+  var lastRandomValue = 200;
+
+  var timeBase = Math.floor(new Date().getTime() / 1000);
+
+  this.addData = function(data) {
+
+    var randomValue = Math.random() * 100 + 15 + lastRandomValue;
+    var index = data[0].length;
+
+    var counter = 1;
+
+    data.forEach( function(series) {
+      var randomVariance = Math.random() * 20;
+      var v = randomValue / 25  + counter++ +
+        (Math.cos((index * counter * 11) / 960) + 2) * 15 +
+        (Math.cos(index / 7) + 2) * 7 +
+        (Math.cos(index / 17) + 2) * 1;
+
+      series.push( { x: (index * timeInterval) + timeBase, y: v + randomVariance } );
+    } );
+
+    lastRandomValue = randomValue * 0.85;
+  };
+
+  this.removeData = function(data) {
+    data.forEach( function(series) {
+      series.shift();
+    } );
+    timeBase += timeInterval;
+  };
+};
+
+
 var rickshaw_sample_chart = function (){
   // set up our data series with 150 random data points
 
   var seriesData = [ [], [], [], [], [], [] ];
-  var random = new Rickshaw.Fixtures.RandomData(150);
+  var random = new Gem.Data(150);
 
   for (var i = 0; i < 150; i++) {
     random.addData(seriesData);

@@ -4,6 +4,10 @@ class DashboardController < ApplicationController
   def monitor  
   end
 
+    # GET /
+  def simple  
+  end
+
   # GET /data.json
   def data
     #@data = Usage.find_by_sql("SELECT FROM_UNIXTIME(stats.timestamp, '%Y-%d-%m %h:%i:%s') as Timestamp, concat(average, '.0') as Average, concat(maximum, '.0') as Max, " + 

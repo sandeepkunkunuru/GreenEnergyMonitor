@@ -7,7 +7,8 @@ Greenenergymonitor::Application.routes.draw do
 
   root 'dashboard#monitor'
   
-  get 'dashboard/data' => 'dashboard#data' 
+  get 'dashboard/simple' => 'dashboard#simple' 
+  get 'dashboard/data' => 'dashboard#data'
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
