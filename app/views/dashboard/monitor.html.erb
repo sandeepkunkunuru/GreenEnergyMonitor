@@ -1,119 +1,3 @@
-<h1>User's Energy Consumption Value vs Average, Maximum, Minimum</h1>
-
-<div id="option">
-    <input type="checkbox" checked="checked" class="messageCheckbox" value="Max"/>Maximum
-    <input type="checkbox" checked="checked" class="messageCheckbox" value="Min"/>Minimum
-    <input type="checkbox" checked="checked"  class="messageCheckbox" id="AVG" value="Average"/>Average
-    <input type="checkbox" checked="checked"  class="messageCheckbox" id="USER" value="User"/>User
-</div>
-
-<br>
-<br>
-
-<script>
-var d3_sample_chart = function(){
-  var parseTimestamp = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
-
-  var margin = {top: 20, right: 80, bottom: 30, left: 50},
-      width = 960 - margin.left - margin.right,
-      height = 500 - margin.top - margin.bottom;
-
-  var x = d3.time.scale()
-      .range([0, width]);
-
-  var y = d3.scale.linear()
-      .range([height, 0]);
-
-  var color = d3.scale.category10();
-
-  var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient("bottom");
-
-  var yAxis = d3.svg.axis()
-      .scale(y)
-      .orient("left");
-
-  var line = d3.svg.line()
-      .interpolate("basis")
-      .x(function(d) { return x(d.Timestamp); })
-      .y(function(d) { return y(d.usage); });
-
-  var svg = d3.select("body").append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-  d3.json("/dashboard/data.json?user_id=1&limit=100", function(error, data) {
-    color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Timestamp"; }));
-
-    data.forEach(function(d) {
-      d.Timestamp = parseTimestamp(d.Timestamp);
-      d.Min = +d.Min;
-      d.Max = +d.Max;
-      d.Average = +d.Average;
-      d.Value = +d.Value;
-    });
-
-    var cities = color.domain().map(function(name) {
-      return {
-        name: name,
-        values: data.map(function(d) {
-          return {Timestamp: d.Timestamp, usage: +d[name]};
-        })
-      };
-    });
-
-    x.domain(d3.extent(data, function(d) { return d.Timestamp; }));
-
-    y.domain([
-      d3.min(cities, function(c) { return d3.min(c.values, function(v) { return v.usage; }); }),
-      d3.max(cities, function(c) { return d3.max(c.values, function(v) { return v.usage; }); })
-    ]);
-
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
-
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-      .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text("usage");
-
-    var city = svg.selectAll(".city")
-        .data(cities)
-      .enter().append("g")
-        .attr("class", "city");
-
-    city.append("path")
-        .attr("class", function(d) { return "line " +  d.name})
-        .attr("d", function(d) { return line(d.values); })
-        .style("stroke", function(d) { return color(d.name); });
-
-    city.append("text")
-        .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
-        .attr("transform", function(d) { return "translate(" + x(d.value.Timestamp) + "," + y(d.value.usage) + ")"; })
-        .attr("x", 3)
-        .attr("dy", ".35em")
-        .text(function(d) { return d.name; });
-  });
-
-  d3.selectAll('.messageCheckbox').on('click', function () {
-      var value = this.value,
-          checked = this.checked;
-      d3.select('.' + value).classed('hidden', !checked);
-  });
-}
-d3_sample_chart();
-</script>
-
 <div id="content">
 
   <form id="side_panel">
@@ -182,36 +66,24 @@ d3_sample_chart();
 
 
 <script>
-
+var start_time = <%= @start_time %>;
+var window_size = <%= @window_size %>;
+var end_time = <%= @start_time + @window_size %>
 var Gem = new Object();
 
 Gem.Data = function(timeInterval) {
 
   var addData;
   timeInterval = timeInterval || 1;
+  var timeBase = start_time;
 
-  var lastRandomValue = 200;
-
-  var timeBase = Math.floor(new Date().getTime() / 1000);
-
-  this.addData = function(data) {
-
-    var randomValue = Math.random() * 100 + 15 + lastRandomValue;
-    var index = data[0].length;
-
-    var counter = 1;
-
-    data.forEach( function(series) {
-      var randomVariance = Math.random() * 20;
-      var v = randomValue / 25  + counter++ +
-        (Math.cos((index * counter * 11) / 960) + 2) * 15 +
-        (Math.cos(index / 7) + 2) * 7 +
-        (Math.cos(index / 17) + 2) * 1;
-
-      series.push( { x: (index * timeInterval) + timeBase, y: v + randomVariance } );
-    } );
-
-    lastRandomValue = randomValue * 0.85;
+  this.addData = function(data, seriesData) {
+    for(var i = 0; i < 4; i++){
+      var counter = 0;
+      data[i + 1].forEach( function(datum) {
+        seriesData[i].push({ x: (data[0][counter++]), y: +datum });
+      } );
+    }
   };
 
   this.removeData = function(data) {
@@ -222,16 +94,12 @@ Gem.Data = function(timeInterval) {
   };
 };
 
+// set up our data series with 150 random data points
+d3.json("/dashboard/data_by_date.json?user_id=1&start_time="+ start_time +"&end_time="+ end_time, function(error, data){
+  var seriesData = [[],[],[],[]];  
+  var random = new Gem.Data();
 
-var rickshaw_sample_chart = function (){
-  // set up our data series with 150 random data points
-
-  var seriesData = [ [], [], [], [], [], [] ];
-  var random = new Gem.Data(150);
-
-  for (var i = 0; i < 150; i++) {
-    random.addData(seriesData);
-  }
+  random.addData(data, seriesData);
 
   var palette = new Rickshaw.Color.Palette( { scheme: 'classic9' } );
 
@@ -248,11 +116,11 @@ var rickshaw_sample_chart = function (){
       {
         color: palette.color(),
         data: seriesData[0],
-        name: 'Maximum'
+        name: 'Max'
       }, {
         color: palette.color(),
         data: seriesData[1],
-        name: 'Minimum'
+        name: 'Min'
       }, {
         color: palette.color(),
         data: seriesData[2],
@@ -260,7 +128,7 @@ var rickshaw_sample_chart = function (){
       }, {
         color: palette.color(),
         data: seriesData[3],
-        name: 'User'
+        name: 'Value'
       }, 
     ]
   } );
@@ -347,11 +215,23 @@ var rickshaw_sample_chart = function (){
     "Added documentation for new methods"
   ];
 
-  setInterval( function() {
+  var responseData = [[],[],[],[]];
+
+  setInterval(function(){ 
     random.removeData(seriesData);
-    random.addData(seriesData);
+
+    if(responseData[0].length == 0){
+      start_time = end_time;
+      end_time = start_time + window_size;
+      d3.json("/dashboard/data_by_date.json?user_id=1&start_time="+ start_time +"&end_time="+ end_time, function(error, data) {
+        responseData = data;
+        random.addData(responseData, seriesData);
+      });
+    }
+
     graph.update();
 
+    random.removeData(responseData);
   }, 3000 );
 
   function addAnnotation(force) {
@@ -371,7 +251,7 @@ var rickshaw_sample_chart = function (){
   });
 
   previewXAxis.render();
-}
-rickshaw_sample_chart();
+});
+
 </script>
 
