@@ -47,6 +47,4 @@ end
 gem 'trinidad'
 gem 'will_paginate'
 
-group :assets do
-  gem 'twitter-bootstrap-rails'
-end
+gem 'twitter-bootstrap-rails'
