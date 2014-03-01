@@ -1,8 +1,13 @@
 <div id="content">
-<h1>User's Energy Consumption Value vs Average, Max &amp; Min</h1>
-<br><br><br>
+  <hr style="background:#F87431; border:0; height:4px"/>
+  <h1>Your Energy Consumption vis-a-vis Average, Max &amp; Min</h1>
+  <hr style="background:#F87431; border:0; height:4px"/>
+  <br><br><br>
+
   <form id="side_panel">
-    <section><div id="legend"></div></section>
+    <section>
+      <div id="legend"></div>
+    </section>
     <section>
       <div id="renderer_form" class="toggler">
         <input type="radio" name="renderer" id="area" value="area" checked>
@@ -51,6 +56,7 @@
     </section>
     <section>
       <h6>Smoothing</h6>
+
       <div id="smoother"></div>
     </section>
     <section></section>
@@ -61,197 +67,241 @@
     <div id="timeline"></div>
     <div id="preview"></div>
   </div>
+</div>
+
+<hr style="background:#F87431; border:0; height:4px"/>
+<h1>Upload your green button data file </h1>
+<hr style="background:#F87431; border:0; height:4px"/>
+
+<div>
+  <%= form_for :file_upload, :url => dashboard_file_upload_path, :html => {:class => 'form-horizontal'} do |f| %>
+      <h1>Choose to either specify the url for the file or to upload the file</h1>
+
+      <div class="control-group">
+        <%= f.label :file_path, :class => 'control-label' %>
+        <div class="controls">
+          <%= f.file_field :file_path %>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <%= f.label :file_url, :class => 'control-label' %>
+        <div class="controls">
+          <%= f.text_field :file_url %>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <%= f.submit nil, :class => 'btn btn-primary' %>
+        <%= link_to t('.cancel', :default => t('helpers.links.cancel')),
+                    dashboard_file_upload_path, :class => 'btn' %>
+      </div>
+  <% end %>
 
 </div>
 
-
 <script>
-var start_time = <%= @start_time %>;
-var window_size = <%= @window_size %>;
-var end_time = <%= @start_time + @window_size %>
-var Gem = new Object();
+    var start_time = <%= @start_time %>;
+    var window_size = <%= @window_size %>;
+    var end_time = <%= @start_time + @window_size %>;
+    var Gem = new Object();
 
-Gem.Data = function(timeInterval) {
+    Gem.Data = function (timeInterval) {
 
-  var addData;
-  timeInterval = timeInterval || 1;
-  var timeBase = start_time;
+        var addData;
+        timeInterval = timeInterval || 1;
+        var timeBase = start_time;
 
-  this.addData = function(data, seriesData) {
-    for(var i = 0; i < 4; i++){
-      var counter = 0;
-      data[i + 1].forEach( function(datum) {
-        seriesData[i].push({ x: (data[0][counter++]), y: +datum });
-      } );
-    }
-  };
+        this.addData = function (data, seriesData) {
+            for (var i = 0; i < 4; i++) {
+                var counter = 0;
+                data[i + 1].forEach(function (datum) {
+                    seriesData[i].push({ x: (data[0][counter++]), y: +datum });
+                });
+            }
+        };
 
-  this.removeData = function(data) {
-    data.forEach( function(series) {
-      series.shift();
-    } );
-    timeBase += timeInterval;
-  };
-};
+        this.removeData = function (data) {
+            data.forEach(function (series) {
+                series.shift();
+            });
+            timeBase += timeInterval;
+        };
+    };
 
-// set up our data series with 150 random data points
-d3.json("/dashboard/data_by_date.json?user_id=1&start_time="+ start_time +"&end_time="+ end_time, function(error, data){
-  var seriesData = [[],[],[],[]];  
-  var random = new Gem.Data();
+    // set up our data series with 150 random data points
+    d3.json("/dashboard/data_by_date.json?user_id=1&start_time=" + start_time + "&end_time=" + end_time, function (error, data) {
+        var seriesData = [
+            [],
+            [],
+            [],
+            []
+        ];
+        var random = new Gem.Data();
 
-  random.addData(data, seriesData);
+        random.addData(data, seriesData);
 
-  var palette = new Rickshaw.Color.Palette( { scheme: 'classic9' } );
+        var palette = new Rickshaw.Color.Palette({ scheme: 'classic9' });
 
-  // instantiate our graph!
+        // instantiate our graph!
 
-  var graph = new Rickshaw.Graph( {
-    element: document.getElementById("chart"),
-    width: 900,
-    height: 500,
-    renderer: 'area',
-    stroke: true,
-    preserve: true,
-    series: [
-      {
-        color: palette.color(),
-        data: seriesData[0],
-        name: 'Max'
-      }, {
-        color: palette.color(),
-        data: seriesData[1],
-        name: 'Min'
-      }, {
-        color: palette.color(),
-        data: seriesData[2],
-        name: 'Average  '
-      }, {
-        color: palette.color(),
-        data: seriesData[3],
-        name: 'Value'
-      }, 
-    ]
-  } );
+        var graph = new Rickshaw.Graph({
+            element: document.getElementById("chart"),
+            width: 900,
+            height: 500,
+            renderer: 'area',
+            stroke: true,
+            preserve: true,
+            series: [
+                {
+                    color: palette.color(),
+                    data: seriesData[0],
+                    name: 'Max'
+                },
+                {
+                    color: palette.color(),
+                    data: seriesData[1],
+                    name: 'Min'
+                },
+                {
+                    color: palette.color(),
+                    data: seriesData[2],
+                    name: 'Average  '
+                },
+                {
+                    color: palette.color(),
+                    data: seriesData[3],
+                    name: 'Value'
+                },
+            ]
+        });
 
-  graph.render();
+        graph.render();
 
-  var preview = new Rickshaw.Graph.RangeSlider.Preview( {
-    graph: graph,
-    element: document.getElementById('preview'),
-  } );
+        var preview = new Rickshaw.Graph.RangeSlider.Preview({
+            graph: graph,
+            element: document.getElementById('preview'),
+        });
 
-  var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-    graph: graph,
-    xFormatter: function(x) {
-      return new Date(x * 1000).toString();
-    }
-  } );
+        var hoverDetail = new Rickshaw.Graph.HoverDetail({
+            graph: graph,
+            xFormatter: function (x) {
+                return new Date(x * 1000).toString();
+            }
+        });
 
-  var annotator = new Rickshaw.Graph.Annotate( {
-    graph: graph,
-    element: document.getElementById('timeline')
-  } );
+        var annotator = new Rickshaw.Graph.Annotate({
+            graph: graph,
+            element: document.getElementById('timeline')
+        });
 
-  var legend = new Rickshaw.Graph.Legend( {
-    graph: graph,
-    element: document.getElementById('legend')
+        var legend = new Rickshaw.Graph.Legend({
+            graph: graph,
+            element: document.getElementById('legend')
 
-  } );
+        });
 
-  var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
-    graph: graph,
-    legend: legend
-  } );
+        var shelving = new Rickshaw.Graph.Behavior.Series.Toggle({
+            graph: graph,
+            legend: legend
+        });
 
-  var order = new Rickshaw.Graph.Behavior.Series.Order( {
-    graph: graph,
-    legend: legend
-  } );
+        var order = new Rickshaw.Graph.Behavior.Series.Order({
+            graph: graph,
+            legend: legend
+        });
 
-  var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
-    graph: graph,
-    legend: legend
-  } );
+        var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight({
+            graph: graph,
+            legend: legend
+        });
 
-  var smoother = new Rickshaw.Graph.Smoother( {
-    graph: graph,
-    element: $('#smoother')
-  } );
+        var smoother = new Rickshaw.Graph.Smoother({
+            graph: graph,
+            element: $('#smoother')
+        });
 
-  var ticksTreatment = 'glow';
+        var ticksTreatment = 'glow';
 
-  var xAxis = new Rickshaw.Graph.Axis.Time( {
-    graph: graph,
-    ticksTreatment: ticksTreatment,
-    timeFixture: new Rickshaw.Fixtures.Time.Local()
-  } );
+        var xAxis = new Rickshaw.Graph.Axis.Time({
+            graph: graph,
+            ticksTreatment: ticksTreatment,
+            timeFixture: new Rickshaw.Fixtures.Time.Local()
+        });
 
-  xAxis.render();
+        xAxis.render();
 
-  var yAxis = new Rickshaw.Graph.Axis.Y( {
-    graph: graph,
-    tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-    ticksTreatment: ticksTreatment
-  } );
+        var yAxis = new Rickshaw.Graph.Axis.Y({
+            graph: graph,
+            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+            ticksTreatment: ticksTreatment
+        });
 
-  yAxis.render();
+        yAxis.render();
 
 
-  var controls = new RenderControls( {
-    element: document.querySelector('form'),
-    graph: graph
-  } );
+        var controls = new RenderControls({
+            element: document.querySelector('form'),
+            graph: graph
+        });
 
-  // add some data every so often
+        // add some data every so often
 
-  var messages = [
-    "Changed home page welcome message",
-    "Minified JS and CSS",
-    "Changed button color from blue to green",
-    "Refactored SQL query to use indexed columns",
-    "Added additional logging for debugging",
-    "Fixed typo",
-    "Rewrite conditional logic for clarity",
-    "Added documentation for new methods"
-  ];
+        var messages = [
+            "Changed home page welcome message",
+            "Minified JS and CSS",
+            "Changed button color from blue to green",
+            "Refactored SQL query to use indexed columns",
+            "Added additional logging for debugging",
+            "Fixed typo",
+            "Rewrite conditional logic for clarity",
+            "Added documentation for new methods"
+        ];
 
-  var responseData = [[],[],[],[]];
+        var responseData = [
+            [],
+            [],
+            [],
+            []
+        ];
 
-  setInterval(function(){ 
-    random.removeData(seriesData);
+        setInterval(function () {
+            random.removeData(seriesData);
 
-    if(responseData[0].length == 0){
-      start_time = end_time;
-      end_time = start_time + window_size;
-      d3.json("/dashboard/data_by_date.json?user_id=1&start_time="+ start_time +"&end_time="+ end_time, function(error, data) {
-        responseData = data;
-        random.addData(responseData, seriesData);
-      });
-    }
+            if (responseData[0].length == 0) {
+                start_time = end_time;
+                end_time = start_time + window_size;
+                d3.json("/dashboard/data_by_date.json?user_id=1&start_time=" + start_time + "&end_time=" + end_time, function (error, data) {
+                    responseData = data;
+                    random.addData(responseData, seriesData);
+                });
+            }
 
-    graph.update();
+            graph.update();
 
-    random.removeData(responseData);
-  }, 3000 );
+            random.removeData(responseData);
+        }, 3000);
 
-  function addAnnotation(force) {
-    if (messages.length > 0 && (force || Math.random() >= 0.95)) {
-      annotator.add(seriesData[2][seriesData[2].length-1].x, messages.shift());
-      annotator.update();
-    }
-  }
+        function addAnnotation(force) {
+            if (messages.length > 0 && (force || Math.random() >= 0.95)) {
+                annotator.add(seriesData[2][seriesData[2].length - 1].x, messages.shift());
+                annotator.update();
+            }
+        }
 
-  addAnnotation(true);
-  setTimeout( function() { setInterval( addAnnotation, 6000 ) }, 6000 );
+        addAnnotation(true);
+        setTimeout(function () {
+            setInterval(addAnnotation, 6000)
+        }, 6000);
 
-  var previewXAxis = new Rickshaw.Graph.Axis.Time({
-    graph: preview.previews[0],
-    timeFixture: new Rickshaw.Fixtures.Time.Local(),
-    ticksTreatment: ticksTreatment
-  });
+        var previewXAxis = new Rickshaw.Graph.Axis.Time({
+            graph: preview.previews[0],
+            timeFixture: new Rickshaw.Fixtures.Time.Local(),
+            ticksTreatment: ticksTreatment
+        });
 
-  previewXAxis.render();
-});
+        previewXAxis.render();
+    });
 
 </script>
 
