@@ -1,4 +1,5 @@
 class DashboardController < ApplicationController
+  before_filter :authenticate_user!
   FIXNUM = 3600 * 15
 
   # GET /

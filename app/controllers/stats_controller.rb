@@ -1,4 +1,5 @@
 class StatsController < ApplicationController
+  before_filter :authenticate_user!
   before_action :set_stat, only: [:show, :edit, :update, :destroy]
 
   # GET /stats

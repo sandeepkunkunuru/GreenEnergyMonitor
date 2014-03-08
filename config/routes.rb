@@ -1,9 +1,10 @@
 Greenenergymonitor::Application.routes.draw do
+  devise_for :users
   resources :usage
 
   resources :stats
 
-  resources :users
+  resources :users , :only => [:index, :show]
 
   root 'dashboard#monitor'
   
