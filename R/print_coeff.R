@@ -6,7 +6,7 @@ print_coeff <- function(db_path, table, user){
   hours <- sapply(timestamps, function(x) as.POSIXlt(x, origin="1970-01-01")$hour)
   days <- sapply(timestamps, function(x) as.POSIXlt(x, origin="1970-01-01")$wday)
   months <- sapply(timestamps, function(x) as.POSIXlt(x, origin="1970-01-01")$mon)
-  values <- as.matrix(usage["value"])
+  values <- as.matrix(usage[usage$user_id==user, "value"])
   lm <- lm(values ~ hours + days + months )
   #plot(values, fitted(lm))
   #print(coef(lm))
