@@ -37,51 +37,54 @@
     <%= javascript_include_tag 'application' %>
   </head>
   <body>
-
-    <div class="navbar navbar-top">
-      <div class="navbar-inner">
+    <div style='background-color: #FAFFEC'>
+        <div class="navbar navbar-top">
+          <div style='text-align: right'>
+            <% if user_signed_in? %>
+                Welcome <strong><%= current_user.email %></strong>.
+            <% end %>
+          </div>
+          <div class="navbar-inner">
+            <div class="container">
+              <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </a>
+              <a class="brand" href="/">Green Energy Monitor</a>
+              <div class="container nav-collapse">
+                <ul class="nav">
+                  <li><%= link_to 'Upload Green Button Data', dashboard_upload_path %></li>
+                  <li><%= link_to 'Your Future Energy Consumption', dashboard_predict_path %></li>
+                  <li><%= link_to 'Usage', usage_index_path %></li>
+                  <% if user_signed_in? %>
+                      <li><%= link_to 'Edit profile', edit_user_registration_path %></li>
+                      <li><%= link_to 'Logout', destroy_user_session_path, method: :delete %></li>
+                  <% else %>
+                      <li><%= link_to 'Sign up', new_user_registration_path %></li>
+                      <li><%= link_to 'Login', new_user_session_path %></li>
+                  <% end %>
+                </ul>
+              </div><!--/.nav-collapse -->
+            </div>
+          </div>
+        </div>
         <div class="container">
-          <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="/">Green Energy Monitor</a>
-          <div class="container nav-collapse">
-            <ul class="nav">
-              <li><%= link_to 'Upload Green Button Data', dashboard_upload_path %></li>
-              <li><%= link_to 'Your Future Energy Consumption', dashboard_predict_path %></li>
-              <li><%= link_to 'Usage', usage_index_path %></li>
-              <% if user_signed_in? %>
-                  <li><%= link_to 'Edit profile', edit_user_registration_path %></li>
-                  <li><%= link_to 'Logout', destroy_user_session_path, method: :delete %></li>
-              <% else %>
-                  <li><%= link_to 'Sign up', new_user_registration_path %></li>
-                  <li><%= link_to 'Login', new_user_session_path %></li>
-              <% end %>
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div>
-      </div>
+          <div class="row">
+            <div>
+              <%= yield %>
+            </div>
+          </div><!--/row-->
+        </div> <!-- /container -->
+        <br><br>
+        <footer>
+            <h2>About Us</h2>
+            Green energy monitor allows you to monitor and compare your past energy consumption.
+            Also helps you preview your future energy consumption and helps you take proactive insightful decisions based on your data.
+            <p><br><br>&copy; Green Energy Monitor 2014</p>
+        </footer>
     </div>
-    <% if user_signed_in? %>
-      Logged in as <strong><%= current_user.email %></strong>.
-    <% end %>
-    <div class="container">
-      <div class="row">
-        <div>
-          <%= yield %>
-        </div>
-      </div><!--/row-->
-    </div> <!-- /container -->
-    <br><br>
-    <footer>
-        <h2>About Us</h2>
-        Green energy monitor allows you to monitor and compare your past energy consumption.
-        Also helps you preview your future energy consumption and helps you take proactive insightful decisions based on your data.
-        <p><br><br>&copy; Green Energy Monitor 2014</p>
-    </footer>
   </body>
 </html>
