@@ -1,7 +1,7 @@
 <div id="content">
-  <hr style="background:#F87431; border:0; height:4px"/>
+  <hr style="background:#F87431; border:0; height:2px"/>
   <h1>Your Energy Consumption vis-a-vis Average, Max &amp; Min</h1>
-  <hr style="background:#F87431; border:0; height:4px"/>
+  <hr style="background:#F87431; border:0; height:2px"/>
   <br><br><br>
 
   <form id="side_panel">
@@ -69,37 +69,6 @@
   </div>
 </div>
 
-<hr style="background:#F87431; border:0; height:4px"/>
-<h1>Upload your green button data file </h1>
-<hr style="background:#F87431; border:0; height:4px"/>
-
-<div>
-  <%= form_for :file_upload, :url => dashboard_file_upload_path, :html => {:class => 'form-horizontal'} do |f| %>
-      <h1>Choose to either specify the url for the file or to upload the file</h1>
-
-      <div class="control-group">
-        <%= f.label :file_path, :class => 'control-label' %>
-        <div class="controls">
-          <%= f.file_field :file_path %>
-        </div>
-      </div>
-
-      <div class="control-group">
-        <%= f.label :file_url, :class => 'control-label' %>
-        <div class="controls">
-          <%= f.text_field :file_url %>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <%= f.submit nil, :class => 'btn btn-primary' %>
-        <%= link_to t('.cancel', :default => t('helpers.links.cancel')),
-                    dashboard_file_upload_path, :class => 'btn' %>
-      </div>
-  <% end %>
-
-</div>
-
 <script>
     var start_time = <%= @start_time %>;
     var window_size = <%= @window_size %>;
@@ -130,7 +99,7 @@
     };
 
     // set up our data series with 150 random data points
-    d3.json("/dashboard/data_by_date.json?user_id=1&start_time=" + start_time + "&end_time=" + end_time, function (error, data) {
+    d3.json("/dashboard/data_by_date.json?start_time=" + start_time + "&end_time=" + end_time, function (error, data) {
         var seriesData = [
             [],
             [],

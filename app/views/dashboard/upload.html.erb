@@ -1,0 +1,28 @@
+<div  id="content">
+  <%= form_for :file_upload, :url => dashboard_file_upload_path, :html => {:class => 'form-horizontal'} do |f| %>
+      <br><br>
+      <h1>Choose to either specify the url for the file or to upload the file</h1>
+      <br><br>
+
+      <div class="control-group">
+        <%= f.label :file_url, :class => 'control-label' %>
+        <div class="controls">
+          <%= f.text_field :file_url, :class => 'text_field'%>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <%= f.label :file_path, :class => 'control-label' %>
+        <div class="controls">
+          <%= f.file_field :file_path, :class => 'file_field' %>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <%= f.submit nil, :class => 'btn btn-primary' %>
+        <%= link_to t('.cancel', :default => t('helpers.links.cancel')),
+                    root_path, :class => 'btn' %>
+      </div>
+  <% end %>
+
+</div>

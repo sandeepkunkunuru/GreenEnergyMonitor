@@ -7,11 +7,14 @@ Greenenergymonitor::Application.routes.draw do
   resources :users , :only => [:index, :show]
 
   root 'dashboard#monitor'
-  
-  get 'dashboard/simple' => 'dashboard#simple' 
-  get 'dashboard/data' => 'dashboard#data'
+
+  get 'dashboard/monitor' => 'dashboard#monitor'
+  get 'dashboard/upload' => 'dashboard#upload'
   get 'dashboard/data_by_date' => 'dashboard#data_by_date'
   post 'dashboard/file_upload' => 'dashboard#file_upload'
+
+  get 'dashboard/simple' => 'dashboard#simple'
+  get 'dashboard/data' => 'dashboard#data'
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
