@@ -1,3 +1,5 @@
+require 'rserve'
+
 class DashboardController < ApplicationController
   before_filter :authenticate_user!
   FIXNUM = 3600 * 15
@@ -44,7 +46,12 @@ class DashboardController < ApplicationController
   end
 
   # GET /
-  def simple  
+  def simple
+    con=Rserve::Connection.new
+    con.eval("source('/home/kunkunur/print_coeff.R')");
+
+    x=con.eval("x<-print_coeff('/home/kunkunur/dev/prototype/greenenergymonitor/db/development.sqlite3', 'usage', #{current_user.id})")
+    puts x.to_ruby["coefficients"]
   end
 
   # GET /data.json
