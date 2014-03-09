@@ -13,7 +13,7 @@ class DashboardController < ApplicationController
 
     # GET /data_by_date.json
   def data_by_date
-   @data = Usage.find_by_sql("select timestamp as Timestamp, avg(value) as Average,  max(value) || '.0' as Max, min(value) || '.0' as Min, value || '.0' as Value from `usage` where timestamp >= #{params[:start_time]} and timestamp < #{params[:end_time]} group by timestamp order by Timestamp asc")
+   @data = Usage.find_by_sql("select timestamp as Timestamp, avg(value) || '' as Average,  max(value) || '.0' as Max, min(value) || '.0' as Min, value || '.0' as Value from `usage` where timestamp >= #{params[:start_time]} and timestamp < #{params[:end_time]} group by timestamp order by Timestamp asc")
   end
 
   # GET /upload
