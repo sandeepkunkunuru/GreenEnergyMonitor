@@ -10,6 +10,10 @@ class DashboardController < ApplicationController
 
    @start_time  = (@start_time.blank? ? 0 : @start_time)
 
+   if @start_time == 0
+     redirect_to dashboard_upload_url
+   end
+
    @window_size = FIXNUM
   end
 
@@ -53,21 +57,24 @@ class DashboardController < ApplicationController
 
   # GET /future_data_by_date.json
   def future_data_by_date
-    con=Rserve::Connection.new
-    source  = "source('#{File.absolute_path('R/print_coeff.R')}')"
-    con.eval(source);
+    coeff = session[:coeff]
 
-    coeff = con.eval("x<-print_coeff('#{File.absolute_path('db/development.sqlite3')}', 'usage', #{current_user.id})")
-    coeff = coeff.to_ruby
+    if coeff.blank?
+      con = Rserve::Connection.new
+      con.eval("source('#{File.absolute_path('R/print_coeff.R')}')");
 
-    puts coeff.inspect
+      coeff = con.eval("x<-print_coeff('#{File.absolute_path('db/development.sqlite3')}', 'usage', #{current_user.id})")
+      coeff = coeff.to_ruby
 
-    start_time  = params[:start_time].to_i
-    end_time    = params[:end_time].to_i
-    time_range = start_time..end_time
+      puts coeff.inspect
 
+      session[:coeff] = coeff
+    end
+
+    time_range = params[:start_time].to_i..params[:end_time].to_i
     time_stamps = time_range.step(15*60).map {|timestamp| timestamp.to_i }.uniq
     @data = []
+
     time_stamps.each do |timestamp|
       temp_date = Time.at(timestamp)
 
