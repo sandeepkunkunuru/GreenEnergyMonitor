@@ -9,9 +9,13 @@ Greenenergymonitor::Application.routes.draw do
   root 'dashboard#monitor'
 
   get 'dashboard/monitor' => 'dashboard#monitor'
-  get 'dashboard/upload' => 'dashboard#upload'
   get 'dashboard/data_by_date' => 'dashboard#data_by_date'
+
+  get 'dashboard/upload' => 'dashboard#upload'
   post 'dashboard/file_upload' => 'dashboard#file_upload'
+
+  get 'dashboard/predict' => 'dashboard#predict'
+  get 'dashboard/future_data_by_date' => 'dashboard#future_data_by_date'
 
   get 'dashboard/simple' => 'dashboard#simple'
   get 'dashboard/data' => 'dashboard#data'

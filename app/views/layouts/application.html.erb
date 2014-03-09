@@ -51,9 +51,9 @@
           <a class="brand" href="/">Green Energy Monitor</a>
           <div class="container nav-collapse">
             <ul class="nav">
-              <li><%= link_to 'Upload Green Button Data', '/dashboard/upload' %></li>
-              <li><%= link_to 'Usage', '/usage' %></li>
-              <li><%= link_to 'Statistics', '/stats' %></li>
+              <li><%= link_to 'Upload Green Button Data', dashboard_upload_path %></li>
+              <li><%= link_to 'Your Future Energy Consumption', dashboard_predict_path %></li>
+              <li><%= link_to 'Usage', usage_index_path %></li>
               <% if user_signed_in? %>
                   <li><%= link_to 'Edit profile', edit_user_registration_path %></li>
                   <li><%= link_to 'Logout', destroy_user_session_path, method: :delete %></li>
@@ -76,7 +76,8 @@
         </div>
         <div class="span3">
           <h2>About Us</h2>
-          Green energy monitor allows you to monitor and compare your energy consumption.
+          Green energy monitor allows you to monitor and compare your past energy consumption.
+          Also helps you preview your future energy consumption and helps you take proactive insightful decisions based on your data.
         </div>
       </div><!--/row-->
       <footer>

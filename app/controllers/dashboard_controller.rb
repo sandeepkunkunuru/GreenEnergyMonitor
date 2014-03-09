@@ -45,13 +45,42 @@ class DashboardController < ApplicationController
     redirect_to dashboard_monitor_url
   end
 
+  # GET /predict
+  def predict
+    @start_time = Time.now.to_i
+    @window_size = FIXNUM
+  end
+
+  # GET /future_data_by_date.json
+  def future_data_by_date
+    con=Rserve::Connection.new
+    source  = "source('#{File.absolute_path('R/print_coeff.R')}')"
+    con.eval(source);
+
+    coeff = con.eval("x<-print_coeff('#{File.absolute_path('db/development.sqlite3')}', 'usage', #{current_user.id})")
+    coeff = coeff.to_ruby
+
+    puts coeff.inspect
+
+    start_time  = params[:start_time].to_i
+    end_time    = params[:end_time].to_i
+    time_range = start_time..end_time
+
+    time_stamps = time_range.step(15*60).map {|timestamp| timestamp.to_i }.uniq
+    @data = []
+    time_stamps.each do |timestamp|
+      temp_date = Time.at(timestamp)
+
+      data_point = Hash.new
+      data_point['Timestamp'] = timestamp
+      data_point['Value'] = (coeff[0] + coeff[1]*temp_date.hour + coeff[2]*temp_date.wday + coeff[3]*temp_date.mon).to_s
+      @data << data_point
+    end
+  end
+
+
   # GET /
   def simple
-    con=Rserve::Connection.new
-    con.eval("source('/home/kunkunur/print_coeff.R')");
-
-    x=con.eval("x<-print_coeff('/home/kunkunur/dev/prototype/greenenergymonitor/db/development.sqlite3', 'usage', #{current_user.id})")
-    puts x.to_ruby["coefficients"]
   end
 
   # GET /data.json

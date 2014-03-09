@@ -1,5 +1,5 @@
 <div id="content">
-  <h1>Your Energy Consumption vis-a-vis Average, Max &amp; Min</h1>
+  <h1>Your Projected Future Energy Consumption (Multi-variate Linear regression  model) </h1>
   <br><br><br>
 
   <form id="side_panel">
@@ -80,7 +80,7 @@
         var timeBase = start_time;
 
         this.addData = function (data, seriesData) {
-            for (var i = 0; i < 4; i++) {
+            for (var i = 0; i < 1; i++) {
                 var counter = 0;
                 data[i + 1].forEach(function (datum) {
                     seriesData[i].push({ x: (data[0][counter++]), y: +datum });
@@ -97,11 +97,8 @@
     };
 
     // set up our data series with 150 random data points
-    d3.json("/dashboard/data_by_date.json?start_time=" + start_time + "&end_time=" + end_time, function (error, data) {
+    d3.json("/dashboard/future_data_by_date.json?start_time=" + start_time + "&end_time=" + end_time, function (error, data) {
         var seriesData = [
-            [],
-            [],
-            [],
             []
         ];
         var random = new Gem.Data();
@@ -123,21 +120,6 @@
                 {
                     color: palette.color(),
                     data: seriesData[0],
-                    name: 'Max'
-                },
-                {
-                    color: palette.color(),
-                    data: seriesData[1],
-                    name: 'Min'
-                },
-                {
-                    color: palette.color(),
-                    data: seriesData[2],
-                    name: 'Average  '
-                },
-                {
-                    color: palette.color(),
-                    data: seriesData[3],
                     name: 'Value'
                 }
             ]
@@ -226,9 +208,6 @@
         ];
 
         var responseData = [
-            [],
-            [],
-            [],
             []
         ];
 
@@ -238,7 +217,7 @@
             if (responseData[0].length == 0) {
                 start_time = end_time;
                 end_time = start_time + window_size;
-                d3.json("/dashboard/data_by_date.json?user_id=1&start_time=" + start_time + "&end_time=" + end_time, function (error, data) {
+                d3.json("/dashboard/future_data_by_date.json?user_id=1&start_time=" + start_time + "&end_time=" + end_time, function (error, data) {
                     responseData = data;
                     random.addData(responseData, seriesData);
                 });
@@ -251,7 +230,7 @@
 
         function addAnnotation(force) {
             if (messages.length > 0 && (force || Math.random() >= 0.95)) {
-                annotator.add(seriesData[2][seriesData[2].length - 1].x, messages.shift());
+                annotator.add(seriesData[0][seriesData[0].length - 1].x, messages.shift());
                 annotator.update();
             }
         }
