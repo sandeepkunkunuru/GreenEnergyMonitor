@@ -6,14 +6,14 @@ class DashboardController < ApplicationController
   def monitor
    @start_time = Usage.where(:user_id => current_user.id).minimum(:timestamp)
 
-   @start_time  = (@start_time[0].blank? ? 0 : @start_time[0])
+   @start_time  = (@start_time.blank? ? 0 : @start_time)
 
    @window_size = FIXNUM
   end
 
     # GET /data_by_date.json
   def data_by_date
-   @data = Usage.find_by_sql("SELECT stats.timestamp as Timestamp, average || '.0' as Average,  maximum || '.0' as Max, minimum || '.0' as Min, value || '.0' as Value  from stats, usage where stats.timestamp = usage.timestamp and usage.user_id=#{current_user.id} and  stats.timestamp >= #{params[:start_time]} and stats.timestamp < #{params[:end_time]} order by Timestamp asc")
+   @data = Usage.find_by_sql("select timestamp as Timestamp, avg(value) || '.0' as Average,  max(value) || '.0' as Max, min(value) || '.0' as Min, value || '.0' as Value from `usage` where timestamp >= #{params[:start_time]} and timestamp < #{params[:end_time]} group by timestamp order by Timestamp asc")
   end
 
   # GET /upload
