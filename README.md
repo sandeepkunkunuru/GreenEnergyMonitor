@@ -26,6 +26,11 @@ Tech Stack
 * R, Rserve (Multi-variate linear regression model, ARIMA model in progress)
 * SQlite3
 
+Demo
+=====
+* Screenshots are in demo folder
+* http://www.youtube.com/watch?v=LGl-SKxR_sE
+
 Future Tasks
 =============
 We plan to enhance the application to:
